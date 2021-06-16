@@ -27,7 +27,7 @@ func Connect() (*pg.DB, error) {
 	}
 
 	if viper.GetBool("db_debug") {
-		db.AddQueryHook(&logSQL{})
+		//db.AddQueryHook(&logSQL{})
 	}
 
 	return db, nil
