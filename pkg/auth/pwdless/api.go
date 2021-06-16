@@ -4,10 +4,10 @@ package pwdless
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gofrs/uuid"
 	"github.com/mssola/user_agent"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"

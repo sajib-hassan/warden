@@ -2,7 +2,7 @@
 package logging
 
 import (
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/chi/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"log"

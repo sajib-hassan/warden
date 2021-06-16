@@ -18,7 +18,7 @@ import (
 	"time"
 
 	jwt_go "github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi"
 	"github.com/spf13/viper"
 )
 
