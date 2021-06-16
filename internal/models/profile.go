@@ -3,10 +3,8 @@ package models
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-pg/pg/v10/orm"
+	"github.com/go-pg/pg/orm"
 	"time"
-
-
 )
 
 // Profile holds specific application settings linked to an Account.

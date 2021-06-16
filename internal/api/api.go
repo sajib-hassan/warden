@@ -4,6 +4,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/sajib-hassan/warden/internal/app"
+	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
+	"github.com/sajib-hassan/warden/pkg/database"
+	"github.com/sajib-hassan/warden/pkg/email"
 	"github.com/sajib-hassan/warden/pkg/logging"
 	"net/http"
 	"time"
@@ -19,30 +23,30 @@ func New() (*chi.Mux, error) {
 		return nil, err
 	}
 
-	//mailer, err := email.NewMailer()
-	//if err != nil {
-	//	logger.WithField("module", "email").Error(err)
-	//	return nil, err
-	//}
+	mailer, err := email.NewMailer()
+	if err != nil {
+		logger.WithField("module", "email").Error(err)
+		return nil, err
+	}
 
-	//authStore := database.NewAuthStore(db)
-	//authResource, err := pwdless.NewResource(authStore, mailer)
-	//if err != nil {
-	//	logger.WithField("module", "auth").Error(err)
-	//	return nil, err
-	//}
-	//
+	authStore := database.NewAuthStore(db)
+	authResource, err := pwdless.NewResource(authStore, mailer)
+	if err != nil {
+		logger.WithField("module", "auth").Error(err)
+		return nil, err
+	}
+
 	//adminAPI, err := admin.NewAPI(db)
 	//if err != nil {
 	//	logger.WithField("module", "admin").Error(err)
 	//	return nil, err
 	//}
-	//
-	//appAPI, err := app.NewAPI(db)
-	//if err != nil {
-	//	logger.WithField("module", "app").Error(err)
-	//	return nil, err
-	//}
+
+	appAPI, err := app.NewAPI(db)
+	if err != nil {
+		logger.WithField("module", "app").Error(err)
+		return nil, err
+	}
 
 	router := chi.NewRouter()
 	router.Use(middleware.Recoverer)
@@ -53,7 +57,6 @@ func New() (*chi.Mux, error) {
 
 	router.Use(logging.NewStructuredLogger(logger))
 	router.Use(render.SetContentType(render.ContentTypeJSON))
-
 
 	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		// @todo Sajib
@@ -70,7 +73,6 @@ func New() (*chi.Mux, error) {
 		//}
 		//res.serveJSON(w)
 	})
-
 
 	//router.Mount("/auth", authResource.Router())
 	//router.Group(func(router chi.Router) {

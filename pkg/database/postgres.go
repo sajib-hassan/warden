@@ -2,10 +2,9 @@
 package database
 
 import (
-	"context"
-	"github.com/go-pg/pg/extra/pgdebug/v10"
-	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg"
 	"github.com/spf13/viper"
+	"log"
 )
 
 // DBConn returns a postgres connection pool.
@@ -29,12 +28,26 @@ func DBConn() (*pg.DB, error) {
 	}
 
 	if viper.GetBool("db_debug") {
-		db.AddQueryHook(pgdebug.NewDebugHook())
+		db.AddQueryHook(&logSQL{})
 	}
 
 	return db, nil
 }
 
+type logSQL struct{}
+
+func (l *logSQL) BeforeQuery(e *pg.QueryEvent) {}
+
+func (l *logSQL) AfterQuery(e *pg.QueryEvent) {
+	query, err := e.FormattedQuery()
+	if err != nil {
+		panic(err)
+	}
+	log.Println(query)
+}
+
 func checkConn(db *pg.DB) error {
-	return db.Ping(context.Background())
+	var n int
+	_, err := db.QueryOne(pg.Scan(&n), "SELECT 1")
+	return err
 }

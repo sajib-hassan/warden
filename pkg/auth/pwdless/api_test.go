@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/email"
+	"github.com/sajib-hassan/warden/pkg/logging"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,12 +18,8 @@ import (
 	"time"
 
 	jwt_go "github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/spf13/viper"
-
-	"github.com/dhax/go-base/auth/jwt"
-	"github.com/dhax/go-base/email"
-	"github.com/dhax/go-base/logging"
 )
 
 var (

@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/dhax/go-base/models"
 	"github.com/go-pg/pg"
+	"github.com/sajib-hassan/warden/internal/models"
 )
 
 // ProfileStore implements database operations for profile management.

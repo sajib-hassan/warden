@@ -3,7 +3,7 @@ package pwdless
 import (
 	"github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/go-pg/pg/v10/orm"
+	"github.com/go-pg/pg/orm"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"strings"
 	"time"

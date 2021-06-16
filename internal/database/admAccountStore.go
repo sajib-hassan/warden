@@ -2,11 +2,11 @@ package database
 
 import (
 	"errors"
+	"github.com/sajib-hassan/warden/internal/models"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
 	"net/url"
 
-	"github.com/dhax/go-base/auth/jwt"
-	"github.com/dhax/go-base/auth/pwdless"
-	"github.com/dhax/go-base/models"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/go-pg/pg/urlvalues"

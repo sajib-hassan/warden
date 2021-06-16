@@ -3,9 +3,9 @@ package database
 import (
 	"time"
 
-	"github.com/dhax/go-base/auth/jwt"
-	"github.com/dhax/go-base/auth/pwdless"
 	"github.com/go-pg/pg"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
 )
 
 // AuthStore implements database operations for account pwdlessentication.

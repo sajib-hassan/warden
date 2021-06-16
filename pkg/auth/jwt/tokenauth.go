@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"crypto/rand"
-	"github.com/go-chi/jwtauth/v5"
+	"github.com/go-chi/jwtauth"
 	"net/http"
 	"time"
 

@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg"
 	"github.com/sajib-hassan/warden/internal/models"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
@@ -40,7 +40,7 @@ func (s *AccountStore) Update(a *pwdless.Account) error {
 
 // Delete an account.
 func (s *AccountStore) Delete(a *pwdless.Account) error {
-	err := s.db.RunInTransaction(s.db.Context(), func(tx *pg.Tx) error {
+	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		if _, err := tx.Model(&jwt.Token{}).
 			Where("account_id = ?", a.ID).
 			Delete(); err != nil {

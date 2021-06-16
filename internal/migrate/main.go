@@ -2,8 +2,8 @@
 package migrate
 
 import (
-	"github.com/go-pg/migrations/v8"
-	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/migrations"
+	"github.com/go-pg/pg"
 	"github.com/sajib-hassan/warden/pkg/database"
 	"log"
 )
@@ -15,7 +15,7 @@ func Migrate(args []string) {
 		log.Fatal(err)
 	}
 
-	err = db.RunInTransaction(db.Context(), func(tx *pg.Tx) error {
+	err = db.RunInTransaction(func(tx *pg.Tx) error {
 		oldVersion, newVersion, err := migrations.Run(tx, args...)
 		if err != nil {
 			return err
@@ -45,7 +45,7 @@ func Reset() {
 		log.Fatal(err)
 	}
 
-	err = db.RunInTransaction(db.Context(), func(tx *pg.Tx) error {
+	err = db.RunInTransaction(func(tx *pg.Tx) error {
 		for version != 0 {
 			oldVersion, newVersion, err := migrations.Run(tx, "down")
 			if err != nil {

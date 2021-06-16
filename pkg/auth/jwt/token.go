@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"github.com/go-pg/pg/v10/orm"
+	"github.com/go-pg/pg/orm"
 	"time"
 )
 
