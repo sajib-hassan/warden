@@ -1,4 +1,4 @@
-package database
+package repos
 
 import (
 	"github.com/go-pg/pg"

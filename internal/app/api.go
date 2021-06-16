@@ -2,7 +2,7 @@
 package app
 
 import (
-	"github.com/sajib-hassan/warden/internal/database"
+	"github.com/sajib-hassan/warden/internal/repos"
 	"github.com/sajib-hassan/warden/pkg/logging"
 	"net/http"
 
@@ -26,10 +26,10 @@ type API struct {
 
 // NewAPI configures and returns application API.
 func NewAPI(db *pg.DB) (*API, error) {
-	accountStore := database.NewAccountStore(db)
+	accountStore := repos.NewAccountStore(db)
 	account := NewAccountResource(accountStore)
 
-	profileStore := database.NewProfileStore(db)
+	profileStore := repos.NewProfileStore(db)
 	profile := NewProfileResource(profileStore)
 
 	api := &API{

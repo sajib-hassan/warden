@@ -1,5 +1,4 @@
-// Package database implements postgres connection and queries.
-package database
+package dbconn
 
 import (
 	"github.com/go-pg/pg"
@@ -7,8 +6,8 @@ import (
 	"log"
 )
 
-// DBConn returns a postgres connection pool.
-func DBConn() (*pg.DB, error) {
+// Connect returns a postgres connection pool.
+func Connect() (*pg.DB, error) {
 	viper.SetDefault("db_network", "tcp")
 	viper.SetDefault("db_addr", "localhost:5432")
 	viper.SetDefault("db_user", "postgres")

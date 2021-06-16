@@ -4,13 +4,13 @@ package migrate
 import (
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
-	"github.com/sajib-hassan/warden/pkg/database"
+	"github.com/sajib-hassan/warden/pkg/dbconn"
 	"log"
 )
 
 // Migrate runs go-pg migrations
 func Migrate(args []string) {
-	db, err := database.DBConn()
+	db, err := dbconn.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func Migrate(args []string) {
 
 // Reset runs reverts all migrations to version 0 and then applies all migrations to latest
 func Reset() {
-	db, err := database.DBConn()
+	db, err := dbconn.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}

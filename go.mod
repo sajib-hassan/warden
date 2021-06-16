@@ -6,6 +6,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v1.5.4 // indirect
 	github.com/go-chi/chi/v5 v5.0.3
+	github.com/go-chi/docgen v1.2.0
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/go-mail/mail v2.3.1+incompatible
@@ -13,7 +14,6 @@ require (
 	github.com/go-pg/migrations v6.7.3+incompatible
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg v8.0.7+incompatible
-	github.com/go-pg/pg/v10 v10.10.0
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/jaytaylor/html2text v0.0.0-20200412013138-3577fbdbcff7
 	github.com/joho/godotenv v1.3.0

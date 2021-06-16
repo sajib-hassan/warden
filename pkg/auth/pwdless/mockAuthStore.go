@@ -1,6 +1,8 @@
 package pwdless
 
-import "github.com/sajib-hassan/warden/pkg/auth/jwt"
+import (
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+)
 
 // MockAuthStore mocks AuthStorer interface.
 type MockAuthStore struct {

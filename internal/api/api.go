@@ -5,8 +5,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/sajib-hassan/warden/internal/app"
+	"github.com/sajib-hassan/warden/internal/repos"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
-	"github.com/sajib-hassan/warden/pkg/database"
+	"github.com/sajib-hassan/warden/pkg/dbconn"
 	"github.com/sajib-hassan/warden/pkg/email"
 	"github.com/sajib-hassan/warden/pkg/logging"
 	"net/http"
@@ -17,7 +19,7 @@ import (
 func New() (*chi.Mux, error) {
 	logger := logging.NewLogger()
 
-	db, err := database.DBConn()
+	db, err := dbconn.Connect()
 	if err != nil {
 		logger.WithField("module", "database").Error(err)
 		return nil, err
@@ -29,7 +31,7 @@ func New() (*chi.Mux, error) {
 		return nil, err
 	}
 
-	authStore := database.NewAuthStore(db)
+	authStore := repos.NewAuthStore(db)
 	authResource, err := pwdless.NewResource(authStore, mailer)
 	if err != nil {
 		logger.WithField("module", "auth").Error(err)
@@ -74,13 +76,13 @@ func New() (*chi.Mux, error) {
 		//res.serveJSON(w)
 	})
 
-	//router.Mount("/auth", authResource.Router())
-	//router.Group(func(router chi.Router) {
-	//	router.Use(authResource.TokenAuth.Verifier())
-	//	router.Use(jwt.Authenticator)
-	//	router.Mount("/admin", adminAPI.Router())
-	//	router.Mount("/api", appAPI.Router())
-	//})
+	router.Mount("/auth", authResource.Router())
+	router.Group(func(router chi.Router) {
+		router.Use(authResource.TokenAuth.Verifier())
+		router.Use(jwt.Authenticator)
+		//router.Mount("/admin", adminAPI.Router())
+		router.Mount("/api", appAPI.Router())
+	})
 	//
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
