@@ -3,7 +3,6 @@ package pwdless
 import (
 	"github.com/sajib-hassan/warden/pkg/logging"
 	"time"
-
 )
 
 func (rs *Resource) choresTicker() {

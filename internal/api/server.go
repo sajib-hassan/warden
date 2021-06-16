@@ -30,8 +30,8 @@ func NewServer() (*Server, error) {
 		ReadTimeout:  viper.GetDuration("READ_TIMEOUT") * time.Second,
 		WriteTimeout: viper.GetDuration("WRITE_TIMEOUT") * time.Second,
 		IdleTimeout:  viper.GetDuration("IDLE_TIMEOUT") * time.Second,
-		Addr:    ":" + port,
-		Handler: api,
+		Addr:         ":" + port,
+		Handler:      api,
 	}
 
 	return &Server{&srv}, nil

@@ -2,7 +2,7 @@ package migrate
 
 import (
 	"fmt"
-	"github.com/go-pg/migrations/v8"
+	"github.com/go-pg/migrations"
 )
 
 const accountTable = `
