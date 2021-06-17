@@ -90,7 +90,7 @@ func (s *AdmAccountStore) Create(a *usingpin2.User) error {
 			return err
 		}
 		p := &models.Profile{
-			AccountID: a.ID,
+			UserID: a.ID,
 		}
 		return tx.Insert(p)
 	})
@@ -115,12 +115,12 @@ func (s *AdmAccountStore) Update(a *usingpin2.User) error {
 func (s *AdmAccountStore) Delete(a *usingpin2.User) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		if _, err := tx.Model(&jwt.Token{}).
-			Where("account_id = ?", a.ID).
+			Where("user_id = ?", a.ID).
 			Delete(); err != nil {
 			return err
 		}
 		if _, err := tx.Model(&models.Profile{}).
-			Where("account_id = ?", a.ID).
+			Where("user_id = ?", a.ID).
 			Delete(); err != nil {
 			return err
 		}

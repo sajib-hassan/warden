@@ -20,9 +20,9 @@ func NewProfileStore(db *pg.DB) *ProfileStore {
 
 // Get gets an profile by account ID.
 func (s *ProfileStore) Get(accountID int) (*models.Profile, error) {
-	p := models.Profile{AccountID: accountID}
+	p := models.Profile{UserID: accountID}
 	_, err := s.db.Model(&p).
-		Where("account_id = ?", accountID).
+		Where("user_id = ?", accountID).
 		SelectOrInsert()
 
 	return &p, err

@@ -57,7 +57,7 @@ func (rs *AccountResource) router() *chi.Mux {
 func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := jwt.ClaimsFromCtx(r.Context())
-		log().WithField("account_id", claims.ID)
+		log().WithField("user_id", claims.ID)
 		account, err := rs.Store.Get(claims.ID)
 		if err != nil {
 			// account deleted while access token still valid
