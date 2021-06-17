@@ -1,30 +1,29 @@
-// Package pwdless provides JSON Web Token (JWT) authentication and authorization middleware.
-// It implements a passwordless authentication flow by sending login tokens vie email which are then exchanged for JWT access and refresh tokens.
-package pwdless
+package usingpin
 
 import (
 	"fmt"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
-	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/is"
-	"github.com/gofrs/uuid"
-	"github.com/mssola/user_agent"
-	"github.com/sajib-hassan/warden/pkg/auth/jwt"
-	"github.com/sajib-hassan/warden/pkg/email"
-	"github.com/sajib-hassan/warden/pkg/logging"
-	"github.com/sirupsen/logrus"
 	"net/http"
-	"path"
 	"strings"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/gofrs/uuid"
+	"github.com/mssola/user_agent"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/logging"
 )
 
 // AuthStorer defines database operations on accounts and tokens.
 type AuthStorer interface {
-	GetAccount(id int) (*Account, error)
-	GetAccountByEmail(email string) (*Account, error)
-	UpdateAccount(a *Account) error
+	GetUser(id int) (*User, error)
+	GetUserByMobile(mobile string) (*User, error)
+	UpdateUser(a *User) error
 
 	GetToken(token string) (*jwt.Token, error)
 	CreateOrUpdateToken(t *jwt.Token) error
@@ -32,36 +31,22 @@ type AuthStorer interface {
 	PurgeExpiredToken() error
 }
 
-// Mailer defines methods to send account emails.
-type Mailer interface {
-	LoginToken(name, email string, c email.ContentLoginToken) error
-}
-
-// Resource implements passwordless account authentication against a database.
+// Resource implements PIN based account authentication against a database.
 type Resource struct {
-	LoginAuth *LoginTokenAuth
 	TokenAuth *jwt.TokenAuth
 	Store     AuthStorer
-	Mailer    Mailer
 }
 
 // NewResource returns a configured authentication resource.
-func NewResource(authStore AuthStorer, mailer Mailer) (*Resource, error) {
-	loginAuth, err := NewLoginTokenAuth()
-	if err != nil {
-		return nil, err
-	}
-
+func NewResource(authStore AuthStorer) (*Resource, error) {
 	tokenAuth, err := jwt.NewTokenAuth()
 	if err != nil {
 		return nil, err
 	}
 
 	resource := &Resource{
-		LoginAuth: loginAuth,
 		TokenAuth: tokenAuth,
 		Store:     authStore,
-		Mailer:    mailer,
 	}
 
 	resource.choresTicker()
@@ -69,12 +54,11 @@ func NewResource(authStore AuthStorer, mailer Mailer) (*Resource, error) {
 	return resource, nil
 }
 
-// Router provides necessary routes for passwordless authentication flow.
+// Router provides necessary routes for PIN based authentication flow.
 func (rs *Resource) Router() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Post("/login", rs.login)
-	r.Post("/token", rs.token)
 	r.Group(func(r chi.Router) {
 		r.Use(rs.TokenAuth.Verifier())
 		r.Use(jwt.AuthenticateRefreshJWT)
@@ -84,34 +68,52 @@ func (rs *Resource) Router() *chi.Mux {
 	return r
 }
 
-func log(_ *http.Request) logrus.FieldLogger {
+func log() logrus.FieldLogger {
 	return logging.Logger
 }
 
 type loginRequest struct {
-	Email string
+	Mobile string
+	Pin    string
+}
+
+type loginResponse struct {
+	Access  string `json:"access_token"`
+	Refresh string `json:"refresh_token"`
 }
 
 func (body *loginRequest) Bind(r *http.Request) error {
-	body.Email = strings.TrimSpace(body.Email)
-	body.Email = strings.ToLower(body.Email)
+	body.Mobile = strings.TrimSpace(body.Mobile)
+	body.Mobile = strings.ToLower(body.Mobile)
+
+	body.Pin = strings.TrimSpace(body.Pin)
+	body.Pin = strings.ToLower(body.Pin)
+
+	loginPinLength := viper.GetInt("auth_login_pin_length")
 
 	return validation.ValidateStruct(body,
-		validation.Field(&body.Email, validation.Required, is.Email),
+		validation.Field(&body.Mobile,
+			validation.Required,
+			validation.By(CheckValidBDMobileNumber),
+		),
+		validation.Field(&body.Pin, validation.Required, is.Digit, validation.Length(loginPinLength, loginPinLength)),
 	)
 }
 
 func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	body := &loginRequest{}
 	if err := render.Bind(r, body); err != nil {
-		log(r).WithField("email", body.Email).Warn(err)
+		log().WithFields(logrus.Fields{
+			"mobile": body.Mobile,
+			"pin":    "*******",
+		}).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrInvalidLogin))
 		return
 	}
 
-	acc, err := rs.Store.GetAccountByEmail(body.Email)
+	acc, err := rs.Store.GetUserByMobile(body.Mobile)
 	if err != nil {
-		log(r).WithField("email", body.Email).Warn(err)
+		log().WithField("mobile", body.Mobile).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
 		return
 	}
@@ -121,65 +123,12 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lt := rs.LoginAuth.CreateToken(acc.ID)
-
-	fmt.Println("token: ==== :", lt)
-	go func() {
-		content := email.ContentLoginToken{
-			Email:  acc.Email,
-			Name:   acc.Name,
-			URL:    path.Join(rs.LoginAuth.loginURL, lt.Token),
-			Token:  lt.Token,
-			Expiry: lt.Expiry,
-		}
-		if err := rs.Mailer.LoginToken(acc.Name, acc.Email, content); err != nil {
-			log(r).WithField("module", "email").Error(err)
-		}
-	}()
-
-	render.Respond(w, r, http.NoBody)
-}
-
-type tokenRequest struct {
-	Token string `json:"token"`
-}
-
-type tokenResponse struct {
-	Access  string `json:"access_token"`
-	Refresh string `json:"refresh_token"`
-}
-
-func (body *tokenRequest) Bind(r *http.Request) error {
-	body.Token = strings.TrimSpace(body.Token)
-
-	return validation.ValidateStruct(body,
-		validation.Field(&body.Token, validation.Required, is.Alphanumeric),
-	)
-}
-
-func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
-	body := &tokenRequest{}
-	if err := render.Bind(r, body); err != nil {
-		log(r).Warn(err)
-		render.Render(w, r, ErrUnauthorized(ErrLoginToken))
-		return
-	}
-
-	id, err := rs.LoginAuth.GetAccountID(body.Token)
-	if err != nil {
-		render.Render(w, r, ErrUnauthorized(ErrLoginToken))
-		return
-	}
-
-	acc, err := rs.Store.GetAccount(id)
-	if err != nil {
-		// account deleted before login token expired
-		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
-		return
-	}
-
-	if !acc.CanLogin() {
-		render.Render(w, r, ErrUnauthorized(ErrLoginDisabled))
+	if ok, err := acc.isPinMatched(body.Pin); !ok {
+		log().WithFields(logrus.Fields{
+			"mobile": body.Mobile,
+			"pin":    "*******",
+		}).Warn(err)
+		render.Render(w, r, ErrUnauthorized(ErrInvalidLogin))
 		return
 	}
 
@@ -190,32 +139,32 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 		Token:      uuid.Must(uuid.NewV4()).String(),
 		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
 		UpdatedAt:  time.Now(),
-		AccountID:  acc.ID,
+		UserID:     acc.ID,
 		Mobile:     ua.Mobile(),
 		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
 	}
 
 	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
-		log(r).Error(err)
+		log().Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
 	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
 	if err != nil {
-		log(r).Error(err)
+		log().Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
 	acc.LastLogin = time.Now()
-	if err := rs.Store.UpdateAccount(acc); err != nil {
-		log(r).Error(err)
+	if err := rs.Store.UpdateUser(acc); err != nil {
+		log().Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
-	render.Respond(w, r, &tokenResponse{
+	render.Respond(w, r, &loginResponse{
 		Access:  access,
 		Refresh: refresh,
 	})
@@ -236,7 +185,7 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc, err := rs.Store.GetAccount(token.AccountID)
+	acc, err := rs.Store.GetUser(token.UserID)
 	if err != nil {
 		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
 		return
@@ -253,25 +202,25 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 
 	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
 	if err != nil {
-		log(r).Error(err)
+		log().Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
 	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
-		log(r).Error(err)
+		log().Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
 	acc.LastLogin = time.Now()
-	if err := rs.Store.UpdateAccount(acc); err != nil {
-		log(r).Error(err)
+	if err := rs.Store.UpdateUser(acc); err != nil {
+		log().Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
-	render.Respond(w, r, &tokenResponse{
+	render.Respond(w, r, &loginResponse{
 		Access:  access,
 		Refresh: refresh,
 	})

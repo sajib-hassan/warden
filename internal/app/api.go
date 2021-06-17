@@ -4,9 +4,8 @@ package app
 import (
 	"github.com/sajib-hassan/warden/internal/repos"
 	"github.com/sajib-hassan/warden/pkg/logging"
-	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-pg/pg"
 	"github.com/sirupsen/logrus"
 )
@@ -49,7 +48,7 @@ func (a *API) Router() *chi.Mux {
 	return r
 }
 
-func log(_ *http.Request) logrus.FieldLogger {
+func log() logrus.FieldLogger {
 	//return logging.GetLogEntry(r)
 	return logging.Logger
 }

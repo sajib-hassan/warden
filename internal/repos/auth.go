@@ -1,14 +1,15 @@
 package repos
 
 import (
-	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
 	"time"
 
 	"github.com/go-pg/pg"
+
+	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
-// AuthStore implements database operations for account pwdlessentication.
+// AuthStore implements database operations for account PIN based authentication.
 type AuthStore struct {
 	db *pg.DB
 }
@@ -20,28 +21,28 @@ func NewAuthStore(db *pg.DB) *AuthStore {
 	}
 }
 
-// GetAccount returns an account by ID.
-func (s *AuthStore) GetAccount(id int) (*pwdless.Account, error) {
-	a := pwdless.Account{ID: id}
+// GetUser returns an account by ID.
+func (s *AuthStore) GetUser(id int) (*usingpin2.User, error) {
+	a := usingpin2.User{ID: id}
 	err := s.db.Model(&a).
-		Column("account.*").
+		Column("user.*").
 		Where("id = ?id").
 		First()
 	return &a, err
 }
 
-// GetAccountByEmail returns an account by email.
-func (s *AuthStore) GetAccountByEmail(e string) (*pwdless.Account, error) {
-	a := pwdless.Account{Email: e}
+// GetUserByMobile returns an account by mobile.
+func (s *AuthStore) GetUserByMobile(m string) (*usingpin2.User, error) {
+	a := usingpin2.User{Mobile: m}
 	err := s.db.Model(&a).
-		Column("id", "active", "email", "name").
-		Where("email = ?email").
+		Column("id", "active", "mobile", "name", "pin").
+		Where("mobile = ?mobile").
 		First()
 	return &a, err
 }
 
-// UpdateAccount upates account data related to pwdlessentication.
-func (s *AuthStore) UpdateAccount(a *pwdless.Account) error {
+// UpdateUser upates account data related to PIN based authentication .
+func (s *AuthStore) UpdateUser(a *usingpin2.User) error {
 	_, err := s.db.Model(a).
 		Column("last_login").
 		WherePK().

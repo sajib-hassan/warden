@@ -2,9 +2,11 @@ package jwt
 
 import (
 	"context"
-	"github.com/go-chi/jwtauth"
-	"github.com/sajib-hassan/warden/pkg/logging"
 	"net/http"
+
+	"github.com/go-chi/jwtauth"
+
+	"github.com/sajib-hassan/warden/pkg/logging"
 
 	"github.com/go-chi/render"
 )

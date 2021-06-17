@@ -3,6 +3,7 @@ package jwt
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/dgrijalva/jwt-go"
 )
 

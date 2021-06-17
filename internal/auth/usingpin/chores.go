@@ -1,8 +1,9 @@
-package pwdless
+package usingpin
 
 import (
-	"github.com/sajib-hassan/warden/pkg/logging"
 	"time"
+
+	"github.com/sajib-hassan/warden/pkg/logging"
 )
 
 func (rs *Resource) choresTicker() {

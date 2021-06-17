@@ -1,4 +1,4 @@
-package pwdless
+package usingpin
 
 import (
 	"errors"
@@ -9,8 +9,8 @@ import (
 
 // The list of error types presented to the end user as error message.
 var (
-	ErrInvalidLogin  = errors.New("invalid email address")
-	ErrUnknownLogin  = errors.New("email not registered")
+	ErrInvalidLogin  = errors.New("invalid mobile number or PIN")
+	ErrUnknownLogin  = errors.New("mobile not registered")
 	ErrLoginDisabled = errors.New("login for account disabled")
 	ErrLoginToken    = errors.New("invalid or expired login token")
 )

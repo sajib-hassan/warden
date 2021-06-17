@@ -2,14 +2,15 @@ package repos
 
 import (
 	"errors"
-	"github.com/sajib-hassan/warden/internal/models"
-	"github.com/sajib-hassan/warden/pkg/auth/jwt"
-	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
 	"net/url"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/go-pg/pg/urlvalues"
+
+	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
+	"github.com/sajib-hassan/warden/internal/models"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
 var (
@@ -24,7 +25,7 @@ type AdmAccountStore struct {
 	db *pg.DB
 }
 
-// NewAdmAccountStore returns an AccountStore.
+// NewAdmAccountStore returns an UserStore.
 func NewAdmAccountStore(db *pg.DB) *AdmAccountStore {
 	return &AdmAccountStore{
 		db: db,
@@ -62,8 +63,8 @@ func (f *AccountFilter) Apply(q *orm.Query) (*orm.Query, error) {
 }
 
 // List applies a filter and returns paginated array of matching results and total count.
-func (s *AdmAccountStore) List(f *AccountFilter) ([]pwdless.Account, int, error) {
-	a := []pwdless.Account{}
+func (s *AdmAccountStore) List(f *AccountFilter) ([]usingpin2.User, int, error) {
+	a := []usingpin2.User{}
 	count, err := s.db.Model(&a).
 		Apply(f.Apply).
 		SelectAndCount()
@@ -74,7 +75,7 @@ func (s *AdmAccountStore) List(f *AccountFilter) ([]pwdless.Account, int, error)
 }
 
 // Create creates a new account.
-func (s *AdmAccountStore) Create(a *pwdless.Account) error {
+func (s *AdmAccountStore) Create(a *usingpin2.User) error {
 	count, _ := s.db.Model(a).
 		Where("email = ?email").
 		Count()
@@ -98,20 +99,20 @@ func (s *AdmAccountStore) Create(a *pwdless.Account) error {
 }
 
 // Get account by ID.
-func (s *AdmAccountStore) Get(id int) (*pwdless.Account, error) {
-	a := pwdless.Account{ID: id}
+func (s *AdmAccountStore) Get(id int) (*usingpin2.User, error) {
+	a := usingpin2.User{ID: id}
 	err := s.db.Select(&a)
 	return &a, err
 }
 
 // Update account.
-func (s *AdmAccountStore) Update(a *pwdless.Account) error {
+func (s *AdmAccountStore) Update(a *usingpin2.User) error {
 	err := s.db.Update(a)
 	return err
 }
 
 // Delete account.
-func (s *AdmAccountStore) Delete(a *pwdless.Account) error {
+func (s *AdmAccountStore) Delete(a *usingpin2.User) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		if _, err := tx.Model(&jwt.Token{}).
 			Where("account_id = ?", a.ID).

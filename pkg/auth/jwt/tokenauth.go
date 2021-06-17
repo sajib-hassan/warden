@@ -2,9 +2,10 @@ package jwt
 
 import (
 	"crypto/rand"
-	"github.com/go-chi/jwtauth"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/jwtauth"
 
 	"github.com/spf13/viper"
 )

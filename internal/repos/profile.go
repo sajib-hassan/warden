@@ -2,6 +2,7 @@ package repos
 
 import (
 	"github.com/go-pg/pg"
+
 	"github.com/sajib-hassan/warden/internal/models"
 )
 

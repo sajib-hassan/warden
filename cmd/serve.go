@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/sajib-hassan/warden/internal/api"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"log"
 	net "net"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/sajib-hassan/warden/internal/api"
 )
 
 // ServeCmd represents the serve command
@@ -40,7 +42,7 @@ func init() {
 	viper.SetDefault("log_level", "debug")
 
 	viper.SetDefault("auth_login_url", "http://localhost:3000/login")
-	viper.SetDefault("auth_login_token_length", 8)
+	viper.SetDefault("auth_login_pin_length", 5)
 	viper.SetDefault("auth_login_token_expiry", "11m")
 	viper.SetDefault("auth_jwt_secret", "random")
 	viper.SetDefault("auth_jwt_expiry", "15m")

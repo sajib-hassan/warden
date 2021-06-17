@@ -1,23 +1,26 @@
 package api
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
-	"github.com/sajib-hassan/warden/internal/app"
-	"github.com/sajib-hassan/warden/internal/repos"
-	"github.com/sajib-hassan/warden/pkg/auth/jwt"
-	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
-	"github.com/sajib-hassan/warden/pkg/dbconn"
-	"github.com/sajib-hassan/warden/pkg/email"
-	"github.com/sajib-hassan/warden/pkg/logging"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
+	"github.com/sirupsen/logrus"
+
+	"github.com/sajib-hassan/warden/internal/app"
+	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
+	"github.com/sajib-hassan/warden/internal/repos"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/dbconn"
+	"github.com/sajib-hassan/warden/pkg/logging"
 )
 
 // New configures application resources and routes.
 func New() (*chi.Mux, error) {
-	logger := logging.NewLogger()
+
+	router, logger := InitAndBindRouter()
 
 	db, err := dbconn.Connect()
 	if err != nil {
@@ -25,24 +28,12 @@ func New() (*chi.Mux, error) {
 		return nil, err
 	}
 
-	mailer, err := email.NewMailer()
-	if err != nil {
-		logger.WithField("module", "email").Error(err)
-		return nil, err
-	}
-
 	authStore := repos.NewAuthStore(db)
-	authResource, err := pwdless.NewResource(authStore, mailer)
+	authResource, err := usingpin2.NewResource(authStore)
 	if err != nil {
 		logger.WithField("module", "auth").Error(err)
 		return nil, err
 	}
-
-	//adminAPI, err := admin.NewAPI(db)
-	//if err != nil {
-	//	logger.WithField("module", "admin").Error(err)
-	//	return nil, err
-	//}
 
 	appAPI, err := app.NewAPI(db)
 	if err != nil {
@@ -50,43 +41,47 @@ func New() (*chi.Mux, error) {
 		return nil, err
 	}
 
+	router.Mount("/auth", authResource.Router())
+	router.Group(func(router chi.Router) {
+		router.Use(authResource.TokenAuth.Verifier())
+		router.Use(jwt.Authenticator)
+		router.Mount("/api", appAPI.Router())
+	})
+
+	return router, nil
+}
+
+func InitAndBindRouter() (*chi.Mux, *logrus.Logger) {
+	logger := logging.NewLogger()
+
 	router := chi.NewRouter()
-	router.Use(middleware.Recoverer)
+	router.Use(Recoverer)
 	router.Use(middleware.RequestID)
-	// router.Use(middleware.RealIP)
+	router.Use(middleware.RealIP)
 	//router.Use(middleware.DefaultCompress)
 	router.Use(middleware.Timeout(15 * time.Second))
+	router.Use(middleware.Heartbeat("/ping"))
 
 	router.Use(logging.NewStructuredLogger(logger))
 	router.Use(render.SetContentType(render.ContentTypeJSON))
 
 	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		// @todo Sajib
-		//err := newApiError("Not Found", errURINotFound, nil)
-		//panic(err)
+		err := newAPIError("Not Found", errURINotFound, nil)
+		res := response{
+			Code:   http.StatusNotFound,
+			Errors: apiErrors{*err},
+		}
+		res.serveJSON(w)
 	})
 
 	router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		// @todo Sajib
-		//err := newApiError("Method not allowed", errInvalidMethod, nil)
-		//res := response{
-		//	Code:   http.StatusMethodNotAllowed,
-		//	Errors: apiErrors{*err},
-		//}
-		//res.serveJSON(w)
+		err := newAPIError("Method not allowed", errInvalidMethod, nil)
+		res := response{
+			Code:   http.StatusMethodNotAllowed,
+			Errors: apiErrors{*err},
+		}
+		res.serveJSON(w)
 	})
 
-	router.Mount("/auth", authResource.Router())
-	router.Group(func(router chi.Router) {
-		router.Use(authResource.TokenAuth.Verifier())
-		router.Use(jwt.Authenticator)
-		//router.Mount("/admin", adminAPI.Router())
-		router.Mount("/api", appAPI.Router())
-	})
-	//
-	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("pong"))
-	})
-
-	return router, nil
+	return router, logger
 }

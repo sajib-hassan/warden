@@ -4,15 +4,17 @@ go 1.16
 
 require (
 	github.com/PuerkitoBio/goquery v1.4.1 // indirect
+	github.com/alexedwards/argon2id v0.0.0-20210511081203-7d35d68092b8 // indirect
 	github.com/andybalholm/cascadia v1.0.0 // indirect
-	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
+	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-chi/chi v4.0.3+incompatible
-	github.com/go-chi/docgen v1.0.5
+	github.com/getsentry/raven-go v0.2.0 // indirect
+	github.com/go-chi/chi v4.0.0+incompatible // indirect
+	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/go-mail/mail v2.3.1+incompatible
-	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-pg/migrations v6.2.0+incompatible
 	github.com/go-pg/pg v7.1.7+incompatible
 	github.com/gofrs/uuid v3.2.0+incompatible
@@ -35,7 +37,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.6.2
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/vanng822/css v0.0.0-20190504095207-a21e860bcd04 // indirect
 	github.com/vanng822/go-premailer v0.0.0-20191214114701-be27abe028fe
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a // indirect

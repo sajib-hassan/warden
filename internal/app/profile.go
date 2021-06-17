@@ -3,13 +3,14 @@ package app
 import (
 	"context"
 	"errors"
-	"github.com/sajib-hassan/warden/internal/models"
-	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/sajib-hassan/warden/internal/models"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 // The list of error types returned from account resource.
@@ -48,7 +49,7 @@ func (rs *ProfileResource) profileCtx(next http.Handler) http.Handler {
 		claims := jwt.ClaimsFromCtx(r.Context())
 		p, err := rs.Store.Get(claims.ID)
 		if err != nil {
-			log(r).WithField("profileCtx", claims.Sub).Error(err)
+			log().WithField("profileCtx", claims.Sub).Error(err)
 			render.Render(w, r, ErrInternalServerError)
 			return
 		}

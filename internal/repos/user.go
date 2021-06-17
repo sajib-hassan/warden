@@ -2,52 +2,53 @@ package repos
 
 import (
 	"github.com/go-pg/pg"
+
+	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/internal/models"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
-	"github.com/sajib-hassan/warden/pkg/auth/pwdless"
 )
 
-// AccountStore implements database operations for account management by user.
-type AccountStore struct {
+// UserStore implements database operations for account management by user.
+type UserStore struct {
 	db *pg.DB
 }
 
-// NewAccountStore returns an AccountStore.
-func NewAccountStore(db *pg.DB) *AccountStore {
-	return &AccountStore{
+// NewAccountStore returns an UserStore.
+func NewAccountStore(db *pg.DB) *UserStore {
+	return &UserStore{
 		db: db,
 	}
 }
 
 // Get an account by ID.
-func (s *AccountStore) Get(id int) (*pwdless.Account, error) {
-	a := pwdless.Account{ID: id}
+func (s *UserStore) Get(id int) (*usingpin2.User, error) {
+	a := usingpin2.User{ID: id}
 	err := s.db.Model(&a).
-		Where("account.id = ?id").
-		Column("account.*", "Token").
+		Where("user.id = ?id").
+		Column("user.*", "Token").
 		First()
 	return &a, err
 }
 
 // Update an account.
-func (s *AccountStore) Update(a *pwdless.Account) error {
+func (s *UserStore) Update(a *usingpin2.User) error {
 	_, err := s.db.Model(a).
-		Column("email", "name").
+		Column("mobile", "name").
 		WherePK().
 		Update()
 	return err
 }
 
 // Delete an account.
-func (s *AccountStore) Delete(a *pwdless.Account) error {
+func (s *UserStore) Delete(a *usingpin2.User) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		if _, err := tx.Model(&jwt.Token{}).
-			Where("account_id = ?", a.ID).
+			Where("user_id = ?", a.ID).
 			Delete(); err != nil {
 			return err
 		}
 		if _, err := tx.Model(&models.Profile{}).
-			Where("account_id = ?", a.ID).
+			Where("user_id = ?", a.ID).
 			Delete(); err != nil {
 			return err
 		}
@@ -57,7 +58,7 @@ func (s *AccountStore) Delete(a *pwdless.Account) error {
 }
 
 // UpdateToken updates a jwt refresh token.
-func (s *AccountStore) UpdateToken(t *jwt.Token) error {
+func (s *UserStore) UpdateToken(t *jwt.Token) error {
 	_, err := s.db.Model(t).
 		Column("identifier").
 		WherePK().
@@ -66,7 +67,7 @@ func (s *AccountStore) UpdateToken(t *jwt.Token) error {
 }
 
 // DeleteToken deletes a jwt refresh token.
-func (s *AccountStore) DeleteToken(t *jwt.Token) error {
+func (s *UserStore) DeleteToken(t *jwt.Token) error {
 	err := s.db.Delete(t)
 	return err
 }

@@ -2,10 +2,12 @@
 package migrate
 
 import (
+	"log"
+
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
+
 	"github.com/sajib-hassan/warden/pkg/dbconn"
-	"log"
 )
 
 // Migrate runs go-pg migrations

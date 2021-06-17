@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+
 	"github.com/sajib-hassan/warden/cmd"
 )
 

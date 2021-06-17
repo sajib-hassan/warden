@@ -1,9 +1,10 @@
 package dbconn
 
 import (
+	"log"
+
 	"github.com/go-pg/pg"
 	"github.com/spf13/viper"
-	"log"
 )
 
 // Connect returns a postgres connection pool.
@@ -13,6 +14,7 @@ func Connect() (*pg.DB, error) {
 	viper.SetDefault("db_user", "postgres")
 	viper.SetDefault("db_password", "postgres")
 	viper.SetDefault("db_database", "customer_db")
+	viper.SetDefault("db_debug", true)
 
 	db := pg.Connect(&pg.Options{
 		Network:  viper.GetString("db_network"),
@@ -27,7 +29,7 @@ func Connect() (*pg.DB, error) {
 	}
 
 	if viper.GetBool("db_debug") {
-		//db.AddQueryHook(&logSQL{})
+		db.AddQueryHook(&logSQL{})
 	}
 
 	return db, nil

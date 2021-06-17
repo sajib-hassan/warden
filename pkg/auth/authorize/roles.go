@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
+
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 

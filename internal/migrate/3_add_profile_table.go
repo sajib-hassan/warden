@@ -10,14 +10,17 @@ const profileTable = `
 CREATE TABLE profiles (
 id serial NOT NULL,
 updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-account_id int NOT NULL REFERENCES accounts(id),
-theme text NOT NULL DEFAULT 'default',
+user_id int NOT NULL REFERENCES users(id),
+date_of_birth timestamp with time zone NOT NULL,
+nid text NOT NULL,
 PRIMARY KEY (id)
 )`
 
 const bootstrapAccountProfiles = `
-INSERT INTO profiles(account_id) VALUES(1);
-INSERT INTO profiles(account_id) VALUES(2);
+INSERT INTO profiles(user_id, date_of_birth, nid) 
+VALUES(1, '1982-10-06', '1234567890');
+INSERT INTO profiles(user_id, date_of_birth, nid) 
+VALUES(2, '1982-10-07', '0987654321');
 `
 
 func init() {

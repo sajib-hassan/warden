@@ -2,12 +2,13 @@
 package models
 
 import (
-	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/go-pg/pg/orm"
 	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-pg/pg/orm"
 )
 
-// Profile holds specific application settings linked to an Account.
+// Profile holds specific application settings linked to an User.
 type Profile struct {
 	ID        int       `json:"-"`
 	AccountID int       `json:"-"`

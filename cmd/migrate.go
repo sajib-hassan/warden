@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/sajib-hassan/warden/internal/migrate"
 	"github.com/spf13/cobra"
+
+	"github.com/sajib-hassan/warden/internal/migrate"
 )
 
 var reset bool
