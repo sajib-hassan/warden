@@ -2,11 +2,10 @@
 package app
 
 import (
-	"github.com/sajib-hassan/warden/internal/repos"
+	repos2 "github.com/sajib-hassan/warden/internal/db/repos"
 	"github.com/sajib-hassan/warden/pkg/logging"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-pg/pg"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,11 +23,11 @@ type API struct {
 }
 
 // NewAPI configures and returns application API.
-func NewAPI(db *pg.DB) (*API, error) {
-	accountStore := repos.NewAccountStore(db)
+func NewAPI() (*API, error) {
+	accountStore := repos2.NewUserStore()
 	account := NewAccountResource(accountStore)
 
-	profileStore := repos.NewProfileStore(db)
+	profileStore := repos2.NewProfileStore()
 	profile := NewProfileResource(profileStore)
 
 	api := &API{

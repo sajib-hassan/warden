@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/render"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 
-	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
+	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
@@ -22,9 +22,9 @@ var (
 
 // AccountStore defines database operations for account.
 type AccountStore interface {
-	Get(id int) (*usingpin2.User, error)
-	Update(*usingpin2.User) error
-	Delete(*usingpin2.User) error
+	Get(id int) (*usingpin.User, error)
+	Update(*usingpin.User) error
+	Delete(*usingpin.User) error
 	UpdateToken(*jwt.Token) error
 	DeleteToken(*jwt.Token) error
 }
@@ -70,7 +70,7 @@ func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 }
 
 type accountRequest struct {
-	*usingpin2.User
+	*usingpin.User
 	// override protected data here, although not really necessary here
 	// as we limit updated database columns in store as well
 	ProtectedID     int      `json:"id"`
@@ -85,21 +85,21 @@ func (d *accountRequest) Bind(r *http.Request) error {
 }
 
 type accountResponse struct {
-	*usingpin2.User
+	*usingpin.User
 }
 
-func newAccountResponse(a *usingpin2.User) *accountResponse {
+func newAccountResponse(a *usingpin.User) *accountResponse {
 	resp := &accountResponse{User: a}
 	return resp
 }
 
 func (rs *AccountResource) get(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*usingpin2.User)
+	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	render.Respond(w, r, newAccountResponse(acc))
 }
 
 func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*usingpin2.User)
+	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	data := &accountRequest{User: acc}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -120,7 +120,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) delete(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*usingpin2.User)
+	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	if err := rs.Store.Delete(acc); err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
@@ -149,7 +149,7 @@ func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	acc := r.Context().Value(ctxAccount).(*usingpin2.User)
+	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	for _, t := range acc.Token {
 		if t.ID == id {
 			if err := rs.Store.UpdateToken(&jwt.Token{
@@ -170,7 +170,7 @@ func (rs *AccountResource) deleteToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrBadRequest)
 		return
 	}
-	acc := r.Context().Value(ctxAccount).(*usingpin2.User)
+	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	for _, t := range acc.Token {
 		if t.ID == id {
 			rs.Store.DeleteToken(&jwt.Token{ID: t.ID})

@@ -9,10 +9,8 @@ import (
 	"github.com/go-chi/render"
 	"github.com/sirupsen/logrus"
 
-	"github.com/sajib-hassan/warden/internal/app"
-	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
-	"github.com/sajib-hassan/warden/internal/repos"
-	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/internal/auth/usingpin"
+	repos2 "github.com/sajib-hassan/warden/internal/db/repos"
 	"github.com/sajib-hassan/warden/pkg/dbconn"
 	"github.com/sajib-hassan/warden/pkg/logging"
 )
@@ -22,31 +20,31 @@ func New() (*chi.Mux, error) {
 
 	router, logger := InitAndBindRouter()
 
-	db, err := dbconn.Connect()
+	err := dbconn.Connect()
 	if err != nil {
-		logger.WithField("module", "database").Error(err)
+		logger.WithField("module", "mongodb connect").Error(err)
 		return nil, err
 	}
 
-	authStore := repos.NewAuthStore(db)
-	authResource, err := usingpin2.NewResource(authStore)
+	authStore := repos2.NewAuthStore()
+	authResource, err := usingpin.NewResource(authStore)
 	if err != nil {
 		logger.WithField("module", "auth").Error(err)
 		return nil, err
 	}
 
-	appAPI, err := app.NewAPI(db)
-	if err != nil {
-		logger.WithField("module", "app").Error(err)
-		return nil, err
-	}
+	//appAPI, err := app.NewAPI(db)
+	//if err != nil {
+	//	logger.WithField("module", "app").Error(err)
+	//	return nil, err
+	//}
 
 	router.Mount("/auth", authResource.Router())
-	router.Group(func(router chi.Router) {
-		router.Use(authResource.TokenAuth.Verifier())
-		router.Use(jwt.Authenticator)
-		router.Mount("/api", appAPI.Router())
-	})
+	//router.Group(func(router chi.Router) {
+	//	router.Use(authResource.TokenAuth.Verifier())
+	//	router.Use(jwt.Authenticator)
+	//	router.Mount("/api", appAPI.Router())
+	//})
 
 	return router, nil
 }

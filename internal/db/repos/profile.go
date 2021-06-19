@@ -3,7 +3,7 @@ package repos
 import (
 	"github.com/go-pg/pg"
 
-	"github.com/sajib-hassan/warden/internal/models"
+	models2 "github.com/sajib-hassan/warden/internal/db/models"
 )
 
 // ProfileStore implements database operations for profile management.
@@ -12,15 +12,16 @@ type ProfileStore struct {
 }
 
 // NewProfileStore returns a ProfileStore implementation.
-func NewProfileStore(db *pg.DB) *ProfileStore {
+func NewProfileStore() *ProfileStore {
+	db := &pg.DB{}
 	return &ProfileStore{
 		db: db,
 	}
 }
 
 // Get gets an profile by account ID.
-func (s *ProfileStore) Get(accountID int) (*models.Profile, error) {
-	p := models.Profile{UserID: accountID}
+func (s *ProfileStore) Get(accountID int) (*models2.Profile, error) {
+	p := models2.Profile{UserID: accountID}
 	_, err := s.db.Model(&p).
 		Where("user_id = ?", accountID).
 		SelectOrInsert()
@@ -29,7 +30,7 @@ func (s *ProfileStore) Get(accountID int) (*models.Profile, error) {
 }
 
 // Update updates profile.
-func (s *ProfileStore) Update(p *models.Profile) error {
+func (s *ProfileStore) Update(p *models2.Profile) error {
 	err := s.db.Update(p)
 	return err
 }

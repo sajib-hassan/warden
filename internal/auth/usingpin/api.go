@@ -136,10 +136,10 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	browser, _ := ua.Browser()
 
 	token := &jwt.Token{
-		Token:      uuid.Must(uuid.NewV4()).String(),
-		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
-		UpdatedAt:  time.Now(),
-		UserID:     acc.ID,
+		Token:     uuid.Must(uuid.NewV4()).String(),
+		Expiry:    time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
+		UpdatedAt: time.Now(),
+		//UserID:     acc.ID,
 		Mobile:     ua.Mobile(),
 		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
 	}

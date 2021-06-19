@@ -8,8 +8,8 @@ import (
 	"github.com/go-pg/pg/orm"
 	"github.com/go-pg/pg/urlvalues"
 
-	usingpin2 "github.com/sajib-hassan/warden/internal/auth/usingpin"
-	"github.com/sajib-hassan/warden/internal/models"
+	"github.com/sajib-hassan/warden/internal/auth/usingpin"
+	models2 "github.com/sajib-hassan/warden/internal/db/models"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
@@ -63,8 +63,8 @@ func (f *AccountFilter) Apply(q *orm.Query) (*orm.Query, error) {
 }
 
 // List applies a filter and returns paginated array of matching results and total count.
-func (s *AdmAccountStore) List(f *AccountFilter) ([]usingpin2.User, int, error) {
-	a := []usingpin2.User{}
+func (s *AdmAccountStore) List(f *AccountFilter) ([]usingpin.User, int, error) {
+	a := []usingpin.User{}
 	count, err := s.db.Model(&a).
 		Apply(f.Apply).
 		SelectAndCount()
@@ -75,7 +75,7 @@ func (s *AdmAccountStore) List(f *AccountFilter) ([]usingpin2.User, int, error) 
 }
 
 // Create creates a new account.
-func (s *AdmAccountStore) Create(a *usingpin2.User) error {
+func (s *AdmAccountStore) Create(a *usingpin.User) error {
 	count, _ := s.db.Model(a).
 		Where("email = ?email").
 		Count()
@@ -89,8 +89,8 @@ func (s *AdmAccountStore) Create(a *usingpin2.User) error {
 		if err != nil {
 			return err
 		}
-		p := &models.Profile{
-			UserID: a.ID,
+		p := &models2.Profile{
+			//UserID: a.ID,
 		}
 		return tx.Insert(p)
 	})
@@ -99,27 +99,28 @@ func (s *AdmAccountStore) Create(a *usingpin2.User) error {
 }
 
 // Get account by ID.
-func (s *AdmAccountStore) Get(id int) (*usingpin2.User, error) {
-	a := usingpin2.User{ID: id}
+func (s *AdmAccountStore) Get(id int) (*usingpin.User, error) {
+	a := usingpin.User{}
+	//a := usingpin.User{ID: id}
 	err := s.db.Select(&a)
 	return &a, err
 }
 
 // Update account.
-func (s *AdmAccountStore) Update(a *usingpin2.User) error {
+func (s *AdmAccountStore) Update(a *usingpin.User) error {
 	err := s.db.Update(a)
 	return err
 }
 
 // Delete account.
-func (s *AdmAccountStore) Delete(a *usingpin2.User) error {
+func (s *AdmAccountStore) Delete(a *usingpin.User) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		if _, err := tx.Model(&jwt.Token{}).
 			Where("user_id = ?", a.ID).
 			Delete(); err != nil {
 			return err
 		}
-		if _, err := tx.Model(&models.Profile{}).
+		if _, err := tx.Model(&models2.Profile{}).
 			Where("user_id = ?", a.ID).
 			Delete(); err != nil {
 			return err

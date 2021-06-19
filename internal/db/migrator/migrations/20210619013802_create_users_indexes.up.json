@@ -1,0 +1,21 @@
+[{
+  "createIndexes": "users",
+  "indexes": [
+    {
+      "key": {
+        "mobile": 1,
+        "created": -1
+      },
+      "name": "mobile_sort_by_asc_created",
+      "background": true
+    },
+    {
+      "key": {
+        "mobile": 1
+      },
+      "name": "unique_mobile",
+      "unique": true,
+      "background": true
+    }
+  ]
+}]
