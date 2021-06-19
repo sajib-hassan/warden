@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
-	net "net"
+	"net"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,22 +37,15 @@ $ go run main.go s`,
 func init() {
 	RootCmd.AddCommand(serveCmd)
 
-	// Here you will define your flags and configuration settings.
-	viper.SetDefault("port", "8000")
-	viper.SetDefault("log_level", "debug")
-
-	viper.SetDefault("auth_login_url", "http://localhost:3000/login")
-	viper.SetDefault("auth_login_pin_length", 5)
-	viper.SetDefault("auth_login_token_expiry", "11m")
-	viper.SetDefault("auth_jwt_secret", "random")
-	viper.SetDefault("auth_jwt_expiry", "15m")
-	viper.SetDefault("auth_jwt_refresh_expiry", "1h")
-
-	// Here you will define your flags and configuration settings.
-	serveCmd.PersistentFlags().IntP("PORT", "p",
+	serveCmd.PersistentFlags().IntP("port", "p",
 		8000, `Port on which the server will listen. Default port is 8000`,
 	)
-	viper.BindPFlag("PORT", serveCmd.PersistentFlags().Lookup("PORT"))
+	viper.BindPFlag("port", serveCmd.PersistentFlags().Lookup("port"))
+
+	serveCmd.PersistentFlags().StringP("environment", "e",
+		"dev", `Running environment dev, stg, prod, test. (default is dev)`,
+	)
+	viper.BindPFlag("environment", serveCmd.PersistentFlags().Lookup("environment"))
 }
 
 func runServe(cmd *cobra.Command, args []string) {

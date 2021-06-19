@@ -17,16 +17,7 @@ var (
 	RootCmd = &cobra.Command{
 		Use:   "warden",
 		Short: "A RESTful API boilerplate",
-		Long: `A RESTful API boilerplate with the stacks - 
-# Chi
-# Casbin
-# Zap
-# GORM
-# etc.
-`,
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
-		// Run: func(cmd *cobra.Command, args []string) { },
+		Long:  `A RESTful API boilerplate with the stacks`,
 	}
 )
 
@@ -44,16 +35,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.warden.yaml)")
 	RootCmd.PersistentFlags().Bool("db_debug", false, "log sql to console")
 	viper.BindPFlag("db_debug", RootCmd.PersistentFlags().Lookup("db_debug"))
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
