@@ -10,7 +10,7 @@ import (
 // The list of error types presented to the end user as error message.
 var (
 	ErrInvalidLogin  = errors.New("invalid mobile number or PIN")
-	ErrUnknownLogin  = errors.New("mobile not registered")
+	ErrUnknownLogin  = errors.New("unregistered user")
 	ErrLoginDisabled = errors.New("login for account disabled")
 	ErrLoginToken    = errors.New("invalid or expired login token")
 )

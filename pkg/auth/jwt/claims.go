@@ -9,7 +9,7 @@ import (
 
 // AppClaims represent the claims parsed from JWT access token.
 type AppClaims struct {
-	ID    int      `json:"id,omitempty"`
+	ID    string   `json:"id,omitempty"`
 	Sub   string   `json:"sub,omitempty"`
 	Roles []string `json:"roles,omitempty"`
 	jwt.StandardClaims
@@ -21,7 +21,7 @@ func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 	if !ok {
 		return errors.New("could not parse claim id")
 	}
-	c.ID = int(id.(float64))
+	c.ID = id.(string)
 
 	sub, ok := claims["sub"]
 	if !ok {
@@ -56,7 +56,7 @@ func (c *AppClaims) AsMap() (m map[string]interface{}) {
 
 // RefreshClaims represents the claims parsed from JWT refresh token.
 type RefreshClaims struct {
-	ID    int    `json:"id,omitempty"`
+	ID    string `json:"id,omitempty"`
 	Token string `json:"token,omitempty"`
 	jwt.StandardClaims
 }

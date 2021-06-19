@@ -1,13 +1,7 @@
 package repos
 
 import (
-	"context"
-	"log"
-
 	"github.com/kamva/mgm/v3"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
@@ -15,28 +9,11 @@ import (
 
 // UserStore implements database operations for account management by user.
 type UserStore struct {
-	Coll *mgm.Collection
 }
 
 // NewUserStore returns an UserStore.
 func NewUserStore() *UserStore {
-	us := &UserStore{
-		mgm.Coll(&usingpin.User{}),
-	}
-	us.EnsureIndices()
-	return us
-}
-
-func (s *UserStore) EnsureIndices() error {
-	log.Println("Starting EnsureIndices")
-	_, err := s.Coll.Indexes().CreateMany(context.Background(),
-		[]mongo.IndexModel{
-			{
-				Keys:    bson.D{{Key: "mobile", Value: 1}},
-				Options: options.Index().SetUnique(true).SetName("unique_mobile")},
-		})
-	log.Println("Completed EnsureIndices", err)
-	return err
+	return &UserStore{}
 }
 
 // Get an account by ID.

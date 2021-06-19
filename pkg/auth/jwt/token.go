@@ -3,42 +3,24 @@ package jwt
 import (
 	"time"
 
-	"github.com/go-pg/pg/orm"
+	"github.com/kamva/mgm/v3"
 )
 
 // Token holds refresh jwt information.
 type Token struct {
-	ID        int       `json:"id,omitempty"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	UserID    int       `json:"-"`
+	mgm.DefaultModel `bson:",inline"`
+	UserID           string `json:"-" bson:"user_id"`
 
-	Token      string    `json:"-"`
-	Expiry     time.Time `json:"-"`
-	Mobile     bool      `sql:",notnull" json:"mobile"`
-	Identifier string    `json:"identifier,omitempty"`
-}
-
-// BeforeInsert hook executed before database insert operation.
-func (t *Token) BeforeInsert(db orm.DB) error {
-	now := time.Now()
-	if t.CreatedAt.IsZero() {
-		t.CreatedAt = now
-		t.UpdatedAt = now
-	}
-	return nil
-}
-
-// BeforeUpdate hook executed before database update operation.
-func (t *Token) BeforeUpdate(db orm.DB) error {
-	t.UpdatedAt = time.Now()
-	return nil
+	Token      string    `json:"-" bson:"token"`
+	Expiry     time.Time `json:"-" bson:"expiry"`
+	Mobile     bool      `json:"mobile" bson:"mobile"`
+	Identifier string    `json:"identifier,omitempty" bson:"identifier"`
 }
 
 // Claims returns the token claims to be signed
 func (t *Token) Claims() RefreshClaims {
 	return RefreshClaims{
-		ID:    t.ID,
+		ID:    t.ID.Hex(),
 		Token: t.Token,
 	}
 }

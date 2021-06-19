@@ -1,10 +1,10 @@
 [
   {
     "dropIndexes": "users",
-    "index": "mobile_sort_by_asc_created"
+    "index": "idx_usr_mobile_sort_by_asc_created"
   },
   {
     "dropIndexes": "users",
-    "index": "unique_mobile"
+    "index": "idx_usr_unique_mobile"
   }
 ]

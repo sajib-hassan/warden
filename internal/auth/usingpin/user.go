@@ -85,7 +85,7 @@ func (u *User) isPinMatched(pin string) (bool, error) {
 // Claims returns the account's claims to be signed
 func (u *User) Claims() jwt.AppClaims {
 	return jwt.AppClaims{
-		//ID:    u.ID,
+		ID:    u.ID.Hex(),
 		Sub:   u.Name,
 		Roles: u.Roles,
 	}

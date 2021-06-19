@@ -21,7 +21,7 @@ import (
 
 // AuthStorer defines database operations on accounts and tokens.
 type AuthStorer interface {
-	GetUser(id int) (*User, error)
+	GetUser(id string) (*User, error)
 	GetUserByMobile(mobile string) (*User, error)
 	UpdateUser(a *User) error
 
@@ -112,7 +112,7 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	acc, err := rs.Store.GetUserByMobile(body.Mobile)
-	if err != nil {
+	if err != nil || acc == nil {
 		log().WithField("mobile", body.Mobile).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
 		return
@@ -136,10 +136,9 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	browser, _ := ua.Browser()
 
 	token := &jwt.Token{
-		Token:     uuid.Must(uuid.NewV4()).String(),
-		Expiry:    time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
-		UpdatedAt: time.Now(),
-		//UserID:     acc.ID,
+		Token:      uuid.Must(uuid.NewV4()).String(),
+		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
+		UserID:     acc.ID.Hex(),
 		Mobile:     ua.Mobile(),
 		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
 	}
