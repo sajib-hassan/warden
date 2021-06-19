@@ -14,9 +14,6 @@ var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "use migration tool",
 	Long:  `migration uses migrate tool under the hood supporting the same commands and an additional reset command`,
-	//Run: func(cmd *cobra.Command, args []string) {
-	//	migrator.Execute(args)
-	//},
 }
 
 var createCmd = &cobra.Command{
