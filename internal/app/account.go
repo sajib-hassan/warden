@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -22,7 +21,7 @@ var (
 
 // AccountStore defines database operations for account.
 type AccountStore interface {
-	Get(id int) (*usingpin.User, error)
+	Get(id string) (*usingpin.User, error)
 	Update(*usingpin.User) error
 	Delete(*usingpin.User) error
 	UpdateToken(*jwt.Token) error
@@ -139,11 +138,7 @@ func (d *tokenRequest) Bind(r *http.Request) error {
 }
 
 func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "tokenID"))
-	if err != nil {
-		render.Render(w, r, ErrBadRequest)
-		return
-	}
+	id := chi.URLParam(r, "tokenID")
 	data := &tokenRequest{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -151,29 +146,25 @@ func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 	}
 	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	for _, t := range acc.Token {
-		if t.ID == id {
-			if err := rs.Store.UpdateToken(&jwt.Token{
-				ID:         t.ID,
-				Identifier: data.Identifier,
-			}); err != nil {
-				render.Render(w, r, ErrInvalidRequest(err))
-				return
-			}
+		if t.ID.Hex() == id {
+			//if err := rs.Store.UpdateToken(&jwt.Token{
+			//	ID:         t.ID,
+			//	Identifier: data.Identifier,
+			//}); err != nil {
+			//	render.Render(w, r, ErrInvalidRequest(err))
+			//	return
+			//}
 		}
 	}
 	render.Respond(w, r, http.NoBody)
 }
 
 func (rs *AccountResource) deleteToken(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "tokenID"))
-	if err != nil {
-		render.Render(w, r, ErrBadRequest)
-		return
-	}
+	id := chi.URLParam(r, "tokenID")
 	acc := r.Context().Value(ctxAccount).(*usingpin.User)
 	for _, t := range acc.Token {
-		if t.ID == id {
-			rs.Store.DeleteToken(&jwt.Token{ID: t.ID})
+		if t.ID.Hex() == id {
+			//rs.Store.DeleteToken(&jwt.Token{ID: t.ID})
 		}
 	}
 	render.Respond(w, r, http.NoBody)

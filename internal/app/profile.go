@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	models2 "github.com/sajib-hassan/warden/internal/db/models"
+	"github.com/sajib-hassan/warden/internal/db/models"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 
 	"github.com/go-chi/chi/v5"
@@ -20,8 +20,8 @@ var (
 
 // ProfileStore defines database operations for a profile.
 type ProfileStore interface {
-	Get(accountID int) (*models2.Profile, error)
-	Update(p *models2.Profile) error
+	Get(userID string) (*models.Profile, error)
+	Update(p *models.Profile) error
 }
 
 // ProfileResource implements profile management handler.
@@ -59,7 +59,7 @@ func (rs *ProfileResource) profileCtx(next http.Handler) http.Handler {
 }
 
 type profileRequest struct {
-	*models2.Profile
+	*models.Profile
 	ProtectedID int `json:"id"`
 }
 
@@ -68,22 +68,22 @@ func (d *profileRequest) Bind(r *http.Request) error {
 }
 
 type profileResponse struct {
-	*models2.Profile
+	*models.Profile
 }
 
-func newProfileResponse(p *models2.Profile) *profileResponse {
+func newProfileResponse(p *models.Profile) *profileResponse {
 	return &profileResponse{
 		Profile: p,
 	}
 }
 
 func (rs *ProfileResource) get(w http.ResponseWriter, r *http.Request) {
-	p := r.Context().Value(ctxProfile).(*models2.Profile)
+	p := r.Context().Value(ctxProfile).(*models.Profile)
 	render.Respond(w, r, newProfileResponse(p))
 }
 
 func (rs *ProfileResource) update(w http.ResponseWriter, r *http.Request) {
-	p := r.Context().Value(ctxProfile).(*models2.Profile)
+	p := r.Context().Value(ctxProfile).(*models.Profile)
 	data := &profileRequest{Profile: p}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))

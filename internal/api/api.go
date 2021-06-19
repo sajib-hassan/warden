@@ -9,8 +9,10 @@ import (
 	"github.com/go-chi/render"
 	"github.com/sirupsen/logrus"
 
+	"github.com/sajib-hassan/warden/internal/app"
 	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	repos2 "github.com/sajib-hassan/warden/internal/db/repos"
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/dbconn"
 	"github.com/sajib-hassan/warden/pkg/logging"
 )
@@ -33,18 +35,18 @@ func New() (*chi.Mux, error) {
 		return nil, err
 	}
 
-	//appAPI, err := app.NewAPI(db)
-	//if err != nil {
-	//	logger.WithField("module", "app").Error(err)
-	//	return nil, err
-	//}
+	appAPI, err := app.NewAPI()
+	if err != nil {
+		logger.WithField("module", "app").Error(err)
+		return nil, err
+	}
 
 	router.Mount("/auth", authResource.Router())
-	//router.Group(func(router chi.Router) {
-	//	router.Use(authResource.TokenAuth.Verifier())
-	//	router.Use(jwt.Authenticator)
-	//	router.Mount("/api", appAPI.Router())
-	//})
+	router.Group(func(router chi.Router) {
+		router.Use(authResource.TokenAuth.Verifier())
+		router.Use(jwt.Authenticator)
+		router.Mount("/api", appAPI.Router())
+	})
 
 	return router, nil
 }

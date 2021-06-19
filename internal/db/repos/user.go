@@ -2,8 +2,11 @@ package repos
 
 import (
 	"github.com/kamva/mgm/v3"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/sajib-hassan/warden/internal/auth/usingpin"
+	"github.com/sajib-hassan/warden/internal/db/models"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
@@ -17,15 +20,17 @@ func NewUserStore() *UserStore {
 }
 
 // Get an account by ID.
-func (s *UserStore) Get(id int) (*usingpin.User, error) {
-	a := usingpin.User{}
-	//a := usingpin.User{ID: id}
-	//err := s.db.Model(&a).
-	//	Where("user.id = ?id").
-	//	Column("user.*", "Token").
-	//	First()
-	//return &a, err
-	return &a, nil
+func (s *UserStore) Get(id string) (*usingpin.User, error) {
+	u := &usingpin.User{}
+	err := mgm.Coll(u).FindByID(id, u)
+
+	if err != nil {
+		//if err == mongo.ErrNoDocuments {
+		//	return nil, nil
+		//}
+		return nil, err
+	}
+	return u, nil
 }
 
 // Create a user
@@ -34,47 +39,42 @@ func (s *UserStore) Create(u *usingpin.User) error {
 }
 
 // Update an account.
-func (s *UserStore) Update(a *usingpin.User) error {
-	//_, err := s.db.Model(a).
-	//	Column("mobile", "name").
-	//	WherePK().
-	//	Update()
-	//return err
-	return nil
+func (s *UserStore) Update(u *usingpin.User) error {
+	return mgm.Coll(u).Update(u)
 }
 
 // Delete an account.
-func (s *UserStore) Delete(a *usingpin.User) error {
-	//err := s.db.RunInTransaction(func(tx *pg.Tx) error {
-	//	if _, err := tx.Model(&jwt.Token{}).
-	//		Where("user_id = ?", a.ID).
-	//		Delete(); err != nil {
-	//		return err
-	//	}
-	//	if _, err := tx.Model(&models.Profile{}).
-	//		Where("user_id = ?", a.ID).
-	//		Delete(); err != nil {
-	//		return err
-	//	}
-	//	return tx.Delete(a)
-	//})
-	//return err
-	return nil
+func (s *UserStore) Delete(u *usingpin.User) error {
+
+	return mgm.Transaction(func(session mongo.Session, sc mongo.SessionContext) error {
+
+		_, err := mgm.Coll(&jwt.Token{}).
+			DeleteMany(sc, bson.M{"user_id": u.ID.Hex()})
+		if err != nil {
+			return err
+		}
+
+		_, err = mgm.Coll(&models.Profile{}).
+			DeleteMany(sc, bson.M{"user_id": u.ID.Hex()})
+		if err != nil {
+			return err
+		}
+
+		err = mgm.Coll(u).DeleteWithCtx(sc, u)
+		if err != nil {
+			return err
+		}
+
+		return session.CommitTransaction(sc)
+	})
 }
 
 // UpdateToken updates a jwt refresh token.
 func (s *UserStore) UpdateToken(t *jwt.Token) error {
-	//_, err := s.db.Model(t).
-	//	Column("identifier").
-	//	WherePK().
-	//	Update()
-	//return err
-	return nil
+	return mgm.Coll(t).Update(t)
 }
 
 // DeleteToken deletes a jwt refresh token.
 func (s *UserStore) DeleteToken(t *jwt.Token) error {
-	//err := s.db.Delete(t)
-	//return err
-	return nil
+	return mgm.Coll(t).Delete(t)
 }

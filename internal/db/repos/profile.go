@@ -1,36 +1,40 @@
 package repos
 
 import (
-	"github.com/go-pg/pg"
+	"github.com/kamva/mgm/v3"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
-	models2 "github.com/sajib-hassan/warden/internal/db/models"
+	"github.com/sajib-hassan/warden/internal/db/models"
 )
 
 // ProfileStore implements database operations for profile management.
-type ProfileStore struct {
-	db *pg.DB
-}
+type ProfileStore struct{}
 
 // NewProfileStore returns a ProfileStore implementation.
 func NewProfileStore() *ProfileStore {
-	db := &pg.DB{}
-	return &ProfileStore{
-		db: db,
-	}
+	return &ProfileStore{}
 }
 
 // Get gets an profile by account ID.
-func (s *ProfileStore) Get(accountID int) (*models2.Profile, error) {
-	p := models2.Profile{UserID: accountID}
-	_, err := s.db.Model(&p).
-		Where("user_id = ?", accountID).
-		SelectOrInsert()
+func (s *ProfileStore) Get(userID string) (*models.Profile, error) {
+	p := &models.Profile{UserID: userID}
+	coll := mgm.Coll(p)
 
-	return &p, err
+	err := coll.First(bson.M{"user_id": userID}, p)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			err = coll.Create(p)
+			if err == nil {
+				return p, nil
+			}
+		}
+		return nil, err
+	}
+	return p, nil
 }
 
 // Update updates profile.
-func (s *ProfileStore) Update(p *models2.Profile) error {
-	err := s.db.Update(p)
-	return err
+func (s *ProfileStore) Update(p *models.Profile) error {
+	return mgm.Coll(p).Update(p)
 }

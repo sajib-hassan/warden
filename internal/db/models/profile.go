@@ -6,28 +6,20 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/go-pg/pg/orm"
+	"github.com/kamva/mgm/v3"
 )
 
 // Profile holds specific application settings linked to an User.
 type Profile struct {
-	ID        int       `json:"-"`
-	UserID    int       `json:"-"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	mgm.DefaultModel `bson:",inline"`
+	UserID           string `json:"-"`
 
-	Nid         string `json:"nid,omitempty"`
-	DateOfBirth string `json:"date_of_birth,omitempty"`
+	Nid         string    `json:"nid,omitempty" bson:"nid"`
+	DateOfBirth time.Time `json:"date_of_birth,omitempty" bson:"date_of_birth"`
 }
 
-// BeforeInsert hook executed before database insert operation.
-func (p *Profile) BeforeInsert(db orm.DB) error {
-	p.UpdatedAt = time.Now()
-	return nil
-}
-
-// BeforeUpdate hook executed before database update operation.
-func (p *Profile) BeforeUpdate(db orm.DB) error {
-	p.UpdatedAt = time.Now()
+// Saving hook executed before database update operation.
+func (p *Profile) Saving() error {
 	return p.Validate()
 }
 

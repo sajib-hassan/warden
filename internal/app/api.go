@@ -2,7 +2,7 @@
 package app
 
 import (
-	repos2 "github.com/sajib-hassan/warden/internal/db/repos"
+	"github.com/sajib-hassan/warden/internal/db/repos"
 	"github.com/sajib-hassan/warden/pkg/logging"
 
 	"github.com/go-chi/chi/v5"
@@ -24,10 +24,10 @@ type API struct {
 
 // NewAPI configures and returns application API.
 func NewAPI() (*API, error) {
-	accountStore := repos2.NewUserStore()
+	accountStore := repos.NewUserStore()
 	account := NewAccountResource(accountStore)
 
-	profileStore := repos2.NewProfileStore()
+	profileStore := repos.NewProfileStore()
 	profile := NewProfileResource(profileStore)
 
 	api := &API{

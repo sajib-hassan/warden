@@ -6,7 +6,6 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/go-pg/pg/orm"
 	"github.com/kamva/mgm/v3"
 	"github.com/spf13/viper"
 
@@ -42,16 +41,10 @@ type User struct {
 //	return u.Validate()
 //}
 
-// BeforeUpdate hook executed before database update operation.
-func (u *User) BeforeUpdate(db orm.DB) error {
-	u.UpdatedAt = time.Now()
-	return u.Validate()
-}
-
-// BeforeDelete hook executed before database delete operation.
-func (u *User) BeforeDelete(db orm.DB) error {
-	return nil
-}
+// Saving hook executed before database update operation.
+//func (u *User) Saving() error {
+//	return u.Validate()
+//}
 
 func (u User) validatePin() error {
 	loginPinLength := viper.GetInt("auth_login_pin_length")
