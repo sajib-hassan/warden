@@ -16,7 +16,7 @@ func NewProfileStore() *ProfileStore {
 	return &ProfileStore{}
 }
 
-// Get gets an profile by account ID.
+// Get gets an profile by user ID.
 func (s *ProfileStore) Get(userID string) (*models.Profile, error) {
 	p := &models.Profile{UserID: userID}
 	coll := mgm.Coll(p)

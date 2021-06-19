@@ -10,7 +10,7 @@ import (
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
-// UserStore implements database operations for account management by user.
+// UserStore implements database operations for user management by user.
 type UserStore struct {
 }
 
@@ -19,7 +19,7 @@ func NewUserStore() *UserStore {
 	return &UserStore{}
 }
 
-// Get an account by ID.
+// Get an user by ID.
 func (s *UserStore) Get(id string) (*usingpin.User, error) {
 	u := &usingpin.User{}
 	err := mgm.Coll(u).FindByID(id, u)
@@ -38,12 +38,12 @@ func (s *UserStore) Create(u *usingpin.User) error {
 	return mgm.Coll(u).Create(u)
 }
 
-// Update an account.
+// Update an user.
 func (s *UserStore) Update(u *usingpin.User) error {
 	return mgm.Coll(u).Update(u)
 }
 
-// Delete an account.
+// Delete an user.
 func (s *UserStore) Delete(u *usingpin.User) error {
 
 	return mgm.Transaction(func(session mongo.Session, sc mongo.SessionContext) error {

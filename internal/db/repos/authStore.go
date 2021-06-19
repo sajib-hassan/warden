@@ -10,7 +10,7 @@ import (
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
-// AuthStore implements database operations for account PIN based authentication.
+// AuthStore implements database operations for user PIN based authentication.
 type AuthStore struct {
 }
 
@@ -19,7 +19,7 @@ func NewAuthStore() *AuthStore {
 	return &AuthStore{}
 }
 
-// GetUser returns an account by ID.
+// GetUser returns an user by ID.
 func (s *AuthStore) GetUser(id string) (*usingpin.User, error) {
 	u := &usingpin.User{}
 	err := mgm.Coll(u).FindByID(id, u)
@@ -33,7 +33,7 @@ func (s *AuthStore) GetUser(id string) (*usingpin.User, error) {
 	return u, nil
 }
 
-// GetUserByMobile returns an account by mobile.
+// GetUserByMobile returns an user by mobile.
 func (s *AuthStore) GetUserByMobile(m string) (*usingpin.User, error) {
 	u := &usingpin.User{}
 	err := mgm.Coll(u).First(bson.M{"mobile": m}, u)
@@ -47,7 +47,7 @@ func (s *AuthStore) GetUserByMobile(m string) (*usingpin.User, error) {
 	return u, nil
 }
 
-// UpdateUser updates account data related to PIN based authentication .
+// UpdateUser updates user data related to PIN based authentication .
 func (s *AuthStore) UpdateUser(u *usingpin.User) error {
 	return mgm.Coll(u).Update(u)
 }

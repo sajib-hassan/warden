@@ -11,7 +11,7 @@ import (
 var (
 	ErrInvalidLogin  = errors.New("invalid mobile number or PIN")
 	ErrUnknownLogin  = errors.New("unregistered user")
-	ErrLoginDisabled = errors.New("login for account disabled")
+	ErrLoginDisabled = errors.New("login for user disabled")
 	ErrLoginToken    = errors.New("invalid or expired login token")
 )
 

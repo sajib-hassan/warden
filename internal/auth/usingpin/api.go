@@ -19,7 +19,7 @@ import (
 	"github.com/sajib-hassan/warden/pkg/logging"
 )
 
-// AuthStorer defines database operations on accounts and tokens.
+// AuthStorer defines database operations on users and tokens.
 type AuthStorer interface {
 	GetUser(id string) (*User, error)
 	GetUserByMobile(mobile string) (*User, error)
@@ -31,7 +31,7 @@ type AuthStorer interface {
 	PurgeExpiredToken() error
 }
 
-// Resource implements PIN based account authentication against a database.
+// Resource implements PIN based user authentication against a database.
 type Resource struct {
 	TokenAuth *jwt.TokenAuth
 	Store     AuthStorer

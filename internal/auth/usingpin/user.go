@@ -75,7 +75,7 @@ func (u *User) isPinMatched(pin string) (bool, error) {
 	return encryptor.ComparePasswordAndHash(pin, u.Pin)
 }
 
-// Claims returns the account's claims to be signed
+// Claims returns the user's claims to be signed
 func (u *User) Claims() jwt.AppClaims {
 	return jwt.AppClaims{
 		ID:    u.ID.Hex(),

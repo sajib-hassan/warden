@@ -13,7 +13,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-// The list of error types returned from account resource.
+// The list of error types returned from user resource.
 var (
 	ErrProfileValidation = errors.New("profile validation error")
 )
