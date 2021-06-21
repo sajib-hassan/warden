@@ -34,18 +34,6 @@ github.com/go-chi/render
 ## explicit
 github.com/go-ozzo/ozzo-validation/v4
 github.com/go-ozzo/ozzo-validation/v4/is
-# github.com/go-pg/pg v7.1.7+incompatible
-## explicit
-github.com/go-pg/pg
-github.com/go-pg/pg/internal
-github.com/go-pg/pg/internal/iszero
-github.com/go-pg/pg/internal/parser
-github.com/go-pg/pg/internal/pool
-github.com/go-pg/pg/internal/struct_filter
-github.com/go-pg/pg/internal/tag
-github.com/go-pg/pg/orm
-github.com/go-pg/pg/types
-github.com/go-pg/pg/urlvalues
 # github.com/go-stack/stack v1.8.0
 github.com/go-stack/stack
 # github.com/gofrs/uuid v3.2.0+incompatible
@@ -195,8 +183,6 @@ golang.org/x/text/unicode/norm
 # gopkg.in/ini.v1 v1.52.0
 ## explicit
 gopkg.in/ini.v1
-# gopkg.in/yaml.v2 v2.2.8
-gopkg.in/yaml.v2
-# mellium.im/sasl v0.2.1
+# gopkg.in/yaml.v2 v2.4.0
 ## explicit
-mellium.im/sasl
+gopkg.in/yaml.v2
