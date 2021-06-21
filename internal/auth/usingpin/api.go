@@ -112,7 +112,7 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	acc, err := rs.Store.GetUserByMobile(body.Mobile)
-	if err != nil || acc == nil {
+	if err != nil {
 		log().WithField("mobile", body.Mobile).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
 		return

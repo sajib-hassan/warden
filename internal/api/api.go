@@ -11,7 +11,7 @@ import (
 
 	"github.com/sajib-hassan/warden/internal/app"
 	"github.com/sajib-hassan/warden/internal/auth/usingpin"
-	repos2 "github.com/sajib-hassan/warden/internal/db/repos"
+	"github.com/sajib-hassan/warden/internal/db/repos"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/dbconn"
 	"github.com/sajib-hassan/warden/pkg/logging"
@@ -28,7 +28,7 @@ func New() (*chi.Mux, error) {
 		return nil, err
 	}
 
-	authStore := repos2.NewAuthStore()
+	authStore := repos.NewAuthStore()
 	authResource, err := usingpin.NewResource(authStore)
 	if err != nil {
 		logger.WithField("module", "auth").Error(err)
