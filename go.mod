@@ -9,10 +9,10 @@ require (
 	github.com/getsentry/raven-go v0.2.0
 	github.com/go-chi/chi v4.0.0+incompatible // indirect
 	github.com/go-chi/chi/v5 v5.0.3
+	github.com/go-chi/docgen v1.2.0
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
-	github.com/go-pg/pg v7.1.7+incompatible
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/joho/godotenv v1.3.0
@@ -29,5 +29,5 @@ require (
 	github.com/spf13/viper v1.6.2
 	go.mongodb.org/mongo-driver v1.3.4
 	gopkg.in/ini.v1 v1.52.0 // indirect
-	mellium.im/sasl v0.2.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
