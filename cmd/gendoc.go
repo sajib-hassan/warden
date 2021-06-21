@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	routes bool
+	routes   bool
+	jsonFile bool
 )
 
 // gendocCmd represents the gendoc command
@@ -35,19 +36,31 @@ to quickly create a Cobra application.`,
 func init() {
 	RootCmd.AddCommand(gendocCmd)
 
-	gendocCmd.Flags().BoolVarP(&routes, "routes", "r", false, "create api routes markdown file")
+	gendocCmd.Flags().BoolVarP(&routes, "routes", "r", false, "create api routes to file")
+	gendocCmd.Flags().BoolVarP(&jsonFile, "jsonFile", "j", false,
+		"create api routes JSON file otherwise markdown file")
 }
 
 func genRoutesDoc() {
 	api, _ := api.New()
-	fmt.Print("generating routes markdown file: ")
-	md := docgen.MarkdownRoutesDoc(api, docgen.MarkdownOpts{
-		ProjectPath: "github.com/sajib-hassan/warden",
-		Intro:       "Warden REST API.",
-	})
-	if err := ioutil.WriteFile("routes.md", []byte(md), 0644); err != nil {
-		log.Println(err)
-		return
+	if jsonFile {
+		fmt.Print("generating routes json file: ")
+		jsonapi := docgen.JSONRoutesDoc(api)
+		if err := ioutil.WriteFile("routes.json", []byte(jsonapi), 0644); err != nil {
+			log.Println(err)
+
+			return
+		}
+	} else {
+		fmt.Print("generating routes markdown file: ")
+		md := docgen.MarkdownRoutesDoc(api, docgen.MarkdownOpts{
+			ProjectPath: "github.com/sajib-hassan/warden",
+			Intro:       "Warden REST API.",
+		})
+		if err := ioutil.WriteFile("routes.md", []byte(md), 0644); err != nil {
+			log.Println(err)
+			return
+		}
 	}
 	fmt.Println("OK")
 }
