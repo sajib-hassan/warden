@@ -42,10 +42,10 @@ func New() (*chi.Mux, error) {
 	}
 
 	router.Mount("/auth", authResource.Router())
-	router.Group(func(router chi.Router) {
-		router.Use(authResource.TokenAuth.Verifier())
-		router.Use(jwt.Authenticator)
-		router.Mount("/api", appAPI.Router())
+	router.Group(func(rt chi.Router) {
+		rt.Use(authResource.TokenAuth.Verifier())
+		rt.Use(jwt.Authenticator)
+		rt.Mount("/api", appAPI.Router())
 	})
 
 	return router, nil

@@ -38,12 +38,12 @@ Warden REST API.
 	- **/user**
 		- [(*UserResource).userCtx-fm]()
 		- **/**
-			- _DELETE_
-				- [(*UserResource).delete-fm]()
 			- _GET_
 				- [(*UserResource).get-fm]()
 			- _PUT_
 				- [(*UserResource).update-fm]()
+			- _DELETE_
+				- [(*UserResource).delete-fm]()
 
 </details>
 <details>
@@ -61,10 +61,10 @@ Warden REST API.
 		- [(*UserResource).userCtx-fm]()
 		- **/token/{tokenID}**
 			- **/**
-				- _PUT_
-					- [(*UserResource).updateToken-fm]()
 				- _DELETE_
 					- [(*UserResource).deleteToken-fm]()
+				- _PUT_
+					- [(*UserResource).updateToken-fm]()
 
 </details>
 <details>

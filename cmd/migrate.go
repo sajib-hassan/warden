@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/sajib-hassan/warden/internal/db/migrator"
+	"github.com/sajib-hassan/warden/pkg/migrator"
 )
 
 var reset bool
@@ -87,7 +87,7 @@ func init() {
 	migrateCmd.AddCommand(forceCmd)
 	migrateCmd.AddCommand(versionCmd)
 
-	migrateCmd.PersistentFlags().StringP("source", "s", "file://internal/db/migrator/migrations", "Location of the migrations (file://path)")
+	migrateCmd.PersistentFlags().StringP("source", "s", "file://migrations", "Location of the migrations (file://path)")
 	viper.BindPFlag("source", migrateCmd.PersistentFlags().Lookup("source"))
 
 	downCmd.Flags().Bool("all", false, "[-all] Apply all")

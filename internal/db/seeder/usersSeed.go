@@ -14,7 +14,7 @@ func (s Seed) UsersSeed() {
 	pin1, _ := encryptor.GenerateFromPassword("54321")
 	pin2, _ := encryptor.GenerateFromPassword("65432")
 	user1 := &usingpin.User{
-		Mobile: "01670209726",
+		Mobile: "01600000001",
 		Pin:    pin1,
 		Name:   "Sajib",
 		Active: true,
@@ -22,7 +22,7 @@ func (s Seed) UsersSeed() {
 	}
 
 	user2 := &usingpin.User{
-		Mobile: "01794342671",
+		Mobile: "01700000001",
 		Pin:    pin2,
 		Name:   "Hassan",
 		Active: false,
