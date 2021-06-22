@@ -99,7 +99,7 @@ func init() {
 	createCmd.Flags().StringP("ext", "e", "json", "File extension")
 	viper.BindPFlag("extPtr", createCmd.Flags().Lookup("ext"))
 
-	createCmd.Flags().StringP("dir", "", "internal/db/migrator/migrations",
+	createCmd.Flags().StringP("dir", "", "migrations",
 		"Directory to place file in",
 	)
 	viper.BindPFlag("dirPtr", createCmd.Flags().Lookup("dir"))
