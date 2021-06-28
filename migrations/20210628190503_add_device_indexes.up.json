@@ -1,0 +1,29 @@
+[{
+  "createIndexes": "devices",
+  "indexes": [
+    {
+      "key": {
+        "user_id": 1,
+        "identifier": 1,
+        "created": -1
+      },
+      "name": "idx_dvs_usr_id_sort_by_asc_created",
+      "background": true
+    },
+    {
+      "key": {
+        "user_id": 1
+      },
+      "name": "idx_dvs_user_id",
+      "background": true
+    },
+    {
+      "key": {
+        "user_id": 1,
+        "identifier": 1
+      },
+      "name": "idx_dvs_user_id_identifier",
+      "background": true
+    }
+  ]
+}]

@@ -1,0 +1,267 @@
+{
+  "router": {
+    "middlewares": [
+      {
+        "pkg": "github.com/sajib-hassan/warden/internal/api",
+        "func": "Recoverer",
+        "comment": "",
+        "file": "learning/warden/internal/api/recoverer.go",
+        "line": 9
+      },
+      {
+        "pkg": "github.com/go-chi/chi/v5/middleware",
+        "func": "RequestID",
+        "comment": "RequestID is a middleware that injects a request ID into the context of each\nrequest. A request ID is a string of the form \"host.example.com/random-0001\",\nwhere \"random\" is a base62 random string that uniquely identifies this go\nprocess, and where the last number is an atomically incremented request\ncounter.\n",
+        "file": "learning/warden/vendor/github.com/go-chi/chi/v5/middleware/request_id.go",
+        "line": 67
+      },
+      {
+        "pkg": "github.com/go-chi/chi/v5/middleware",
+        "func": "RealIP",
+        "comment": "RealIP is a middleware that sets a http.Request's RemoteAddr to the results\nof parsing either the X-Real-IP header or the X-Forwarded-For header (in that\norder).\n\nThis middleware should be inserted fairly early in the middleware stack to\nensure that subsequent layers (e.g., request loggers) which examine the\nRemoteAddr will see the intended value.\n\nYou should only use this middleware if you can trust the headers passed to\nyou (in particular, the two headers this middleware uses), for example\nbecause you have placed a reverse proxy like HAProxy or nginx in front of\nchi. If your reverse proxies are configured to pass along arbitrary header\nvalues from the client, or if you use this middleware without a reverse\nproxy, malicious clients will be able to make you very sad (or, depending on\nhow you're using RemoteAddr, vulnerable to an attack of some sort).\n",
+        "file": "learning/warden/vendor/github.com/go-chi/chi/v5/middleware/realip.go",
+        "line": 29
+      },
+      {
+        "pkg": "github.com/go-chi/chi/v5/middleware",
+        "func": "Timeout.func1",
+        "comment": "",
+        "file": "learning/warden/vendor/github.com/go-chi/chi/v5/middleware/timeout.go",
+        "line": 34,
+        "anonymous": true
+      },
+      {
+        "pkg": "github.com/go-chi/chi/v5/middleware",
+        "func": "Heartbeat.func1",
+        "comment": "",
+        "file": "learning/warden/vendor/github.com/go-chi/chi/v5/middleware/heartbeat.go",
+        "line": 13,
+        "anonymous": true
+      },
+      {
+        "pkg": "github.com/go-chi/chi/v5/middleware",
+        "func": "RequestLogger.func1",
+        "comment": "",
+        "file": "learning/warden/vendor/github.com/go-chi/chi/v5/middleware/logger.go",
+        "line": 47,
+        "anonymous": true
+      },
+      {
+        "pkg": "github.com/go-chi/render",
+        "func": "SetContentType.func1",
+        "comment": "",
+        "file": "learning/warden/vendor/github.com/go-chi/render/content_type.go",
+        "line": 49,
+        "anonymous": true
+      }
+    ],
+    "routes": {
+      "/api/*": {
+        "router": {
+          "middlewares": [],
+          "routes": {
+            "/profile/*": {
+              "router": {
+                "middlewares": [
+                  {
+                    "pkg": "github.com/sajib-hassan/warden/internal/app",
+                    "func": "(*ProfileResource).profileCtx-fm",
+                    "comment": "",
+                    "file": "learning/warden/internal/app/profile.go",
+                    "line": 47
+                  }
+                ],
+                "routes": {
+                  "/": {
+                    "handlers": {
+                      "GET": {
+                        "middlewares": [],
+                        "method": "GET",
+                        "pkg": "github.com/sajib-hassan/warden/internal/app",
+                        "func": "(*ProfileResource).get-fm",
+                        "comment": "",
+                        "file": "learning/warden/internal/app/profile.go",
+                        "line": 80
+                      },
+                      "PUT": {
+                        "middlewares": [],
+                        "method": "PUT",
+                        "pkg": "github.com/sajib-hassan/warden/internal/app",
+                        "func": "(*ProfileResource).update-fm",
+                        "comment": "",
+                        "file": "learning/warden/internal/app/profile.go",
+                        "line": 85
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "/user/*": {
+              "router": {
+                "middlewares": [
+                  {
+                    "pkg": "github.com/sajib-hassan/warden/internal/app",
+                    "func": "(*UserResource).userCtx-fm",
+                    "comment": "",
+                    "file": "learning/warden/internal/app/user.go",
+                    "line": 56
+                  }
+                ],
+                "routes": {
+                  "/": {
+                    "handlers": {
+                      "DELETE": {
+                        "middlewares": [],
+                        "method": "DELETE",
+                        "pkg": "github.com/sajib-hassan/warden/internal/app",
+                        "func": "(*UserResource).delete-fm",
+                        "comment": "",
+                        "file": "learning/warden/internal/app/user.go",
+                        "line": 121
+                      },
+                      "GET": {
+                        "middlewares": [],
+                        "method": "GET",
+                        "pkg": "github.com/sajib-hassan/warden/internal/app",
+                        "func": "(*UserResource).get-fm",
+                        "comment": "",
+                        "file": "learning/warden/internal/app/user.go",
+                        "line": 95
+                      },
+                      "PUT": {
+                        "middlewares": [],
+                        "method": "PUT",
+                        "pkg": "github.com/sajib-hassan/warden/internal/app",
+                        "func": "(*UserResource).update-fm",
+                        "comment": "",
+                        "file": "learning/warden/internal/app/user.go",
+                        "line": 100
+                      }
+                    }
+                  },
+                  "/token/{tokenID}/*": {
+                    "router": {
+                      "middlewares": [],
+                      "routes": {
+                        "/": {
+                          "handlers": {
+                            "DELETE": {
+                              "middlewares": [],
+                              "method": "DELETE",
+                              "pkg": "github.com/sajib-hassan/warden/internal/app",
+                              "func": "(*UserResource).deleteToken-fm",
+                              "comment": "",
+                              "file": "learning/warden/internal/app/user.go",
+                              "line": 162
+                            },
+                            "PUT": {
+                              "middlewares": [],
+                              "method": "PUT",
+                              "pkg": "github.com/sajib-hassan/warden/internal/app",
+                              "func": "(*UserResource).updateToken-fm",
+                              "comment": "",
+                              "file": "learning/warden/internal/app/user.go",
+                              "line": 140
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/auth/*": {
+        "router": {
+          "middlewares": [
+            {
+              "pkg": "github.com/go-chi/render",
+              "func": "SetContentType.func1",
+              "comment": "",
+              "file": "learning/warden/vendor/github.com/go-chi/render/content_type.go",
+              "line": 49,
+              "anonymous": true
+            }
+          ],
+          "routes": {
+            "/login": {
+              "handlers": {
+                "POST": {
+                  "middlewares": [],
+                  "method": "POST",
+                  "pkg": "github.com/sajib-hassan/warden/internal/auth/usingpin",
+                  "func": "(*Resource).login-fm",
+                  "comment": "",
+                  "file": "learning/warden/internal/auth/usingpin/api.go",
+                  "line": 103
+                }
+              }
+            },
+            "/logout": {
+              "handlers": {
+                "POST": {
+                  "middlewares": [
+                    {
+                      "pkg": "github.com/go-chi/jwtauth",
+                      "func": "Verifier.func1",
+                      "comment": "",
+                      "file": "learning/warden/vendor/github.com/go-chi/jwtauth/jwtauth.go",
+                      "line": 71,
+                      "anonymous": true
+                    },
+                    {
+                      "pkg": "github.com/sajib-hassan/warden/pkg/auth/jwt",
+                      "func": "AuthenticateRefreshJWT",
+                      "comment": "AuthenticateRefreshJWT checks validity of refresh tokens and is only used for access token refresh and logout requests. It responds with 401 Unauthorized for invalid or expired refresh tokens.\n",
+                      "file": "learning/warden/pkg/auth/jwt/authenticator.go",
+                      "line": 67
+                    }
+                  ],
+                  "method": "POST",
+                  "pkg": "github.com/sajib-hassan/warden/internal/auth/usingpin",
+                  "func": "(*Resource).logout-fm",
+                  "comment": "",
+                  "file": "learning/warden/internal/auth/usingpin/api.go",
+                  "line": 228
+                }
+              }
+            },
+            "/refresh": {
+              "handlers": {
+                "POST": {
+                  "middlewares": [
+                    {
+                      "pkg": "github.com/go-chi/jwtauth",
+                      "func": "Verifier.func1",
+                      "comment": "",
+                      "file": "learning/warden/vendor/github.com/go-chi/jwtauth/jwtauth.go",
+                      "line": 71,
+                      "anonymous": true
+                    },
+                    {
+                      "pkg": "github.com/sajib-hassan/warden/pkg/auth/jwt",
+                      "func": "AuthenticateRefreshJWT",
+                      "comment": "AuthenticateRefreshJWT checks validity of refresh tokens and is only used for access token refresh and logout requests. It responds with 401 Unauthorized for invalid or expired refresh tokens.\n",
+                      "file": "learning/warden/pkg/auth/jwt/authenticator.go",
+                      "line": 67
+                    }
+                  ],
+                  "method": "POST",
+                  "pkg": "github.com/sajib-hassan/warden/internal/auth/usingpin",
+                  "func": "(*Resource).refresh-fm",
+                  "comment": "",
+                  "file": "learning/warden/internal/auth/usingpin/api.go",
+                  "line": 172
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

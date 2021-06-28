@@ -1,0 +1,12 @@
+[
+  {
+    "dropIndexes": "tokens",
+    "index": "idx_tkn_token_sort_by_asc_created"
+  },  {
+    "dropIndexes": "tokens",
+    "index": "idx_tkn_user_id"
+  },  {
+    "dropIndexes": "tokens",
+    "index": "idx_tkn_user_id_token"
+  }
+]
