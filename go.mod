@@ -20,6 +20,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mssola/user_agent v0.5.1
 	github.com/pelletier/go-toml v1.6.0 // indirect
+	github.com/pquerna/otp v1.3.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
@@ -29,5 +30,4 @@ require (
 	github.com/spf13/viper v1.6.2
 	go.mongodb.org/mongo-driver v1.3.4
 	gopkg.in/ini.v1 v1.52.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

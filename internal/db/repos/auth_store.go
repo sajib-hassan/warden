@@ -5,9 +5,11 @@ import (
 
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 )
 
 // AuthStore implements database operations for user PIN based authentication.
@@ -85,5 +87,32 @@ func (s *AuthStore) DeleteToken(t *jwt.Token) error {
 func (s *AuthStore) PurgeExpiredToken() error {
 	_, err := mgm.Coll(&jwt.Token{}).
 		DeleteMany(mgm.Ctx(), bson.M{"expiry": bson.M{"$lt": time.Now()}})
+	return err
+}
+
+func (s AuthStore) GetTrustedDevice(userId string, identifier string) (*usingpin.Device, error) {
+	d := &usingpin.Device{}
+	err := mgm.Coll(d).First(bson.M{"user_id": userId, "identifier": identifier, "is_authorized": true}, d)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return d, nil
+}
+
+func (s AuthStore) RegisterAsTrustedDevice(d *usingpin.Device) error {
+	return mgm.Coll(d).Create(d)
+}
+
+func (s AuthStore) CreateOrUpdateTwoFa(t *mfa.TwoFa) error {
+	var err error
+	if t.ID.IsZero() {
+		err = mgm.Coll(t).Create(t)
+	} else {
+		err = mgm.Coll(t).Update(t)
+	}
 	return err
 }

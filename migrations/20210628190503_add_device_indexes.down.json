@@ -1,0 +1,14 @@
+[
+  {
+    "dropIndexes": "devices",
+    "index": "idx_dvs_usr_id_sort_by_asc_created"
+  },
+  {
+    "dropIndexes": "devices",
+    "index": "idx_dvs_user_id"
+  },
+  {
+    "dropIndexes": "devices",
+    "index": "idx_dvs_user_id_identifier"
+  }
+]

@@ -17,14 +17,16 @@ import (
 type User struct {
 	mgm.DefaultModel `bson:",inline"`
 
-	Mobile string   `json:"mobile" bson:"mobile"`
-	Pin    string   `json:"pin" bson:"pin"`
-	Name   string   `json:"name" bson:"name"`
-	Active bool     `json:"active" bson:"active"`
-	Roles  []string `json:"roles,omitempty" bson:"roles"`
+	Mobile string `json:"mobile" bson:"mobile"`
+	Pin    string `json:"pin" bson:"pin"`
+	Name   string `json:"name" bson:"name"`
+	Active bool   `json:"active" bson:"active"`
 
-	LastLogin time.Time   `json:"last_login,omitempty"`
-	Token     []jwt.Token `json:"token,omitempty"`
+	OtpKey    string    `json:"otp_key,omitempty" bson:"otp_key"`
+	LastLogin time.Time `json:"last_login,omitempty" bson:"last_login"`
+
+	Roles []string    `json:"roles,omitempty" bson:"roles"`
+	Token []jwt.Token `json:"token,omitempty"`
 }
 
 // Creating hook executed before database insert operation.

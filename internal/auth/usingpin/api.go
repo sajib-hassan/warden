@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 	"github.com/sajib-hassan/warden/pkg/logging"
 )
 
@@ -29,6 +30,11 @@ type AuthStorer interface {
 	CreateOrUpdateToken(t *jwt.Token) error
 	DeleteToken(t *jwt.Token) error
 	PurgeExpiredToken() error
+
+	GetTrustedDevice(userId string, did string) (*Device, error)
+	RegisterAsTrustedDevice(d *Device) error
+
+	CreateOrUpdateTwoFa(t *mfa.TwoFa) error
 }
 
 // Resource implements PIN based user authentication against a database.
@@ -73,13 +79,18 @@ func log() logrus.FieldLogger {
 }
 
 type loginRequest struct {
-	Mobile string
-	Pin    string
+	Mobile   string `json:"mobile"`
+	Pin      string `json:"pin"`
+	DeviceId string `json:"device_id"`
 }
 
 type loginResponse struct {
 	Access  string `json:"access_token"`
 	Refresh string `json:"refresh_token"`
+}
+
+type loginOTPRequiredResponse struct {
+	ChallengeRequired bool `json:"challenge_required"`
 }
 
 func (body *loginRequest) Bind(r *http.Request) error {
@@ -89,6 +100,8 @@ func (body *loginRequest) Bind(r *http.Request) error {
 	body.Pin = strings.TrimSpace(body.Pin)
 	body.Pin = strings.ToLower(body.Pin)
 
+	body.DeviceId = strings.TrimSpace(body.DeviceId)
+
 	loginPinLength := viper.GetInt("auth_login_pin_length")
 
 	return validation.ValidateStruct(body,
@@ -97,6 +110,7 @@ func (body *loginRequest) Bind(r *http.Request) error {
 			validation.By(CheckValidBDMobileNumber),
 		),
 		validation.Field(&body.Pin, validation.Required, is.Digit, validation.Length(loginPinLength, loginPinLength)),
+		validation.Field(&body.DeviceId, validation.Required, is.ASCII),
 	)
 }
 
@@ -104,8 +118,9 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	body := &loginRequest{}
 	if err := render.Bind(r, body); err != nil {
 		log().WithFields(logrus.Fields{
-			"mobile": body.Mobile,
-			"pin":    "*******",
+			"mobile":    body.Mobile,
+			"pin":       "*******",
+			"device_id": body.DeviceId,
 		}).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrInvalidLogin))
 		return
@@ -125,10 +140,36 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 
 	if ok, err := acc.isPinMatched(body.Pin); !ok {
 		log().WithFields(logrus.Fields{
-			"mobile": body.Mobile,
-			"pin":    "*******",
+			"mobile":    body.Mobile,
+			"pin":       "*******",
+			"device_id": body.DeviceId,
 		}).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrInvalidLogin))
+		return
+	}
+
+	device, err := rs.Store.GetTrustedDevice(acc.ID.Hex(), body.DeviceId)
+	if err != nil {
+		log().WithField("device_id", body.DeviceId).Error(err)
+		render.Render(w, r, ErrUnauthorized(err))
+		return
+	}
+
+	if device == nil {
+		twoFaToken, err := SentLoginOTP(rs.Store, acc)
+		if err != nil {
+			log().WithFields(logrus.Fields{
+				"mobile":    body.Mobile,
+				"device_id": body.DeviceId,
+			}).Error(err)
+			render.Render(w, r, ErrUnauthorized(err))
+			return
+		}
+
+		w.Header().Set("Pathao-Challenge-Token", twoFaToken)
+		render.Respond(w, r, &loginOTPRequiredResponse{
+			ChallengeRequired: true,
+		})
 		return
 	}
 

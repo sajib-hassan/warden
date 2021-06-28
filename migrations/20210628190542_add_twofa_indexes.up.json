@@ -1,0 +1,37 @@
+[{
+  "createIndexes": "two_fas",
+  "indexes": [
+    {
+      "key": {
+        "token": 1,
+        "created": -1
+      },
+      "name": "idx_twofa_token_sort_by_asc_created",
+      "background": true
+    },
+    {
+      "key": {
+        "token": 1
+      },
+      "name": "idx_twofa_unique_token",
+      "unique": true,
+      "background": true
+    },
+    {
+      "key": {
+        "service_id": 1,
+        "service_type": 1
+      },
+      "name": "idx_twofa_service_id_type",
+      "background": true
+    },
+    {
+      "key": {
+        "mobile": 1,
+        "channel": 1
+      },
+      "name": "idx_twofa_mobile_channel",
+      "background": true
+    }
+  ]
+}]

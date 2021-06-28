@@ -1,0 +1,18 @@
+[
+  {
+    "dropIndexes": "twofas",
+    "index": "idx_twofa_token_sort_by_asc_created"
+  },
+  {
+    "dropIndexes": "two_fas",
+    "index": "idx_twofa_unique_token"
+  },
+  {
+    "dropIndexes": "two_fas",
+    "index": "idx_twofa_service_id_type"
+  },
+  {
+    "dropIndexes": "two_fas",
+    "index": "idx_twofa_mobile_channel"
+  }
+]
