@@ -4,7 +4,7 @@
     {
       "key": {
         "token": 1,
-        "created": -1
+        "created_at": -1
       },
       "name": "idx_twofa_token_sort_by_asc_created",
       "background": true

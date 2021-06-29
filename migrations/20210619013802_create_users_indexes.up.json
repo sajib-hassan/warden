@@ -4,7 +4,7 @@
     {
       "key": {
         "mobile": 1,
-        "created": -1
+        "created_at": -1
       },
       "name": "idx_usr_mobile_sort_by_asc_created",
       "background": true
