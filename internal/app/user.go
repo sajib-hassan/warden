@@ -19,15 +19,6 @@ var (
 	ErrUserValidation = errors.New("user validation error")
 )
 
-// UserStore defines database operations for user.
-type UserStore interface {
-	Get(id string) (*usingpin.User, error)
-	Update(*usingpin.User) error
-	Delete(*usingpin.User) error
-	UpdateToken(*jwt.Token) error
-	DeleteToken(*jwt.Token) error
-}
-
 // UserResource implements user management handler.
 type UserResource struct {
 	Store UserStore

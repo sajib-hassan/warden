@@ -11,6 +11,7 @@ import (
 
 	"github.com/sajib-hassan/warden/pkg/auth/encryptor"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/validator"
 )
 
 // User represents an authenticated application user
@@ -22,7 +23,7 @@ type User struct {
 	Name   string `json:"name" bson:"name"`
 	Active bool   `json:"active" bson:"active"`
 
-	OtpKey    string    `json:"otp_key,omitempty" bson:"otp_key"`
+	Secret    string    `json:"secret,omitempty" bson:"secret"`
 	LastLogin time.Time `json:"last_login,omitempty" bson:"last_login"`
 
 	Roles []string    `json:"roles,omitempty" bson:"roles"`
@@ -63,7 +64,7 @@ func (u *User) Validate() error {
 	u.Name = strings.TrimSpace(u.Name)
 
 	return validation.ValidateStruct(u,
-		validation.Field(&u.Mobile, validation.Required, validation.By(CheckValidBDMobileNumber)),
+		validation.Field(&u.Mobile, validation.Required, validation.By(validator.CheckValidBDMobileNumber)),
 		validation.Field(&u.Name, validation.Required, is.ASCII),
 	)
 }

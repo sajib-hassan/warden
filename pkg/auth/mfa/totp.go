@@ -22,7 +22,7 @@ func NewTOTP(p uint) *TOTP {
 
 func (t *TOTP) NewKey(name string) error {
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      viper.GetString("auth_otp_issuer"),
+		Issuer:      viper.GetString("auth_totp_issuer"),
 		AccountName: name,
 	})
 	if err != nil {

@@ -1,4 +1,4 @@
-package usingpin
+package validator
 
 import (
 	"regexp"

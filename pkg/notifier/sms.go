@@ -1,6 +1,10 @@
 package notifier
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+
+	"github.com/sajib-hassan/warden/pkg/helpmate"
+)
 
 const (
 	SMS_USING_PATHAO  = "pathao"
@@ -9,11 +13,6 @@ const (
 	SMS_USING_INFOBIP = "infobip"
 	SMS_USING_CLI     = "cli"
 )
-
-type SMSChannel interface {
-	initialize() error
-	deliver(to string, message string) error
-}
 
 type SMSClient struct {
 	fromName string
@@ -55,10 +54,9 @@ func (c *SMSClient) SetChannel(channelName string) error {
 }
 
 func (c *SMSClient) Send(to, message string) error {
-	to = formatBDMobile(to)
-	return c.channel.deliver(to, message)
-}
-
-func formatBDMobile(m string) string {
-	return m[len(m)-11:]
+	go func() {
+		to = helpmate.FormatBDMobile(to)
+		c.channel.deliver(to, message)
+	}()
+	return nil
 }
