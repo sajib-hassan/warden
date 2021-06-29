@@ -41,6 +41,7 @@ var upCmd = &cobra.Command{
 	Short: "[N] Apply all or N up migrations",
 	Run: func(cmd *cobra.Command, args []string) {
 		migrator.ExecuteUp(args)
+		migrator.ExecuteVersion(args)
 	},
 }
 
@@ -49,6 +50,7 @@ var downCmd = &cobra.Command{
 	Short: "[N] [-all]    Apply all or N down migrations",
 	Run: func(cmd *cobra.Command, args []string) {
 		migrator.ExecuteDown(args)
+		migrator.ExecuteVersion(args)
 	},
 }
 
