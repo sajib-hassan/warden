@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kamva/mgm/v3"
+	"github.com/kamva/mgm/v3/operator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -86,7 +87,7 @@ func (s *AuthStore) DeleteToken(t *jwt.Token) error {
 // PurgeExpiredToken deletes expired refresh token.
 func (s *AuthStore) PurgeExpiredToken() error {
 	_, err := mgm.Coll(&jwt.Token{}).
-		DeleteMany(mgm.Ctx(), bson.M{"expiry": bson.M{"$lt": time.Now()}})
+		DeleteMany(mgm.Ctx(), bson.M{"expiry": bson.M{operator.Lt: time.Now()}})
 	return err
 }
 
@@ -104,9 +105,26 @@ func (s AuthStore) GetTrustedDevice(userId string, identifier string) (*usingpin
 }
 
 func (s AuthStore) RegisterAsTrustedDevice(d *usingpin.Device) error {
-	return mgm.Coll(d).Create(d)
+	var err error
+	if d.ID.IsZero() {
+		err = mgm.Coll(d).Create(d)
+	} else {
+		err = mgm.Coll(d).Update(d)
+	}
+	return err
 }
 
+func (s AuthStore) GetTwoFa(token string, serviceType string, usedFor string) (*mfa.TwoFa, error) {
+	t := &mfa.TwoFa{}
+	err := mgm.Coll(t).First(bson.M{"token": token, "service_type": serviceType, "used_for": usedFor}, t)
+	if err != nil {
+		//if err == mongo.ErrNoDocuments {
+		//	return nil, nil
+		//}
+		return nil, err
+	}
+	return t, nil
+}
 func (s AuthStore) CreateOrUpdateTwoFa(t *mfa.TwoFa) error {
 	var err error
 	if t.ID.IsZero() {
@@ -114,5 +132,15 @@ func (s AuthStore) CreateOrUpdateTwoFa(t *mfa.TwoFa) error {
 	} else {
 		err = mgm.Coll(t).Update(t)
 	}
+	return err
+}
+
+func (s *AuthStore) DeleteTwoFa(t *mfa.TwoFa) error {
+	return mgm.Coll(t).Delete(t)
+}
+
+func (s *AuthStore) PurgeExpiredTwoFa() error {
+	_, err := mgm.Coll(&mfa.TwoFa{}).
+		DeleteMany(mgm.Ctx(), bson.M{"updated_at": bson.M{operator.Lt: time.Now().UTC().Add(time.Hour * -1)}})
 	return err
 }

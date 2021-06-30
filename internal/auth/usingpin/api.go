@@ -37,6 +37,10 @@ func (rs *Resource) Router() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Post("/login", rs.login)
+	r.Route("/challenges", func(r chi.Router) {
+		r.Patch("/resend", rs.resendOTP)
+		r.Patch("/validate", rs.validateOTP)
+	})
 	r.Group(func(r chi.Router) {
 		r.Use(rs.TokenAuth.Verifier())
 		r.Use(jwt.AuthenticateRefreshJWT)

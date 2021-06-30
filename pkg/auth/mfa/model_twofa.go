@@ -1,6 +1,8 @@
 package mfa
 
 import (
+	"time"
+
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/kamva/mgm/v3"
@@ -12,30 +14,27 @@ import (
 const SMS = "sms"
 
 const (
-	STATUS_CREATED  = "created"
-	STATUS_SENT     = "sent"
-	STATUS_RESENT   = "resent"
-	STATUS_VERIFIED = "verified"
-	STATUS_EXPIRE   = "expire"
+	StatusCreated = "created"
 )
 
 type TwoFa struct {
 	mgm.DefaultModel   `bson:",inline"`
-	ServiceId          string `json:"service_id" bson:"service_id"`
-	ServiceType        string `json:"service_type" bson:"service_type"`
-	Channel            string `json:"channel" bson:"channel"` // Default is 'sms'
-	Mobile             string `json:"mobile" bson:"mobile"`
-	Challenge          string `json:"challenge" bson:"challenge"`
-	Token              string `json:"token" bson:"token"`
-	ValidUntil         int64  `json:"valid_until" bson:"valid_until"`
-	RetryCount         int    `json:"retry_count" bson:"retry_count"`
-	MaxAllowedRetry    int    `json:"max_allowed_retry" bson:"max_allowed_retry"`
-	ResendCount        int    `json:"resend_count" bson:"resend_count"`
-	MaxAllowedResend   int    `json:"max_allowed_resend" bson:"max_allowed_resend"`
-	ChallengeSignature string `json:"challenge_signature" bson:"challenge_signature"`
-	IdentitySignature  string `json:"identity_signature" bson:"identity_signature"`
-	UsedFor            string `json:"used_for" bson:"used_for"`
-	Status             string `json:"status" bson:"status"`
+	ServiceId          string                 `json:"service_id" bson:"service_id"`
+	ServiceType        string                 `json:"service_type" bson:"service_type"`
+	Channel            string                 `json:"channel" bson:"channel"` // Default is 'sms'
+	Mobile             string                 `json:"mobile" bson:"mobile"`
+	Challenge          string                 `json:"challenge" bson:"challenge"`
+	Token              string                 `json:"token" bson:"token"`
+	ValidUntil         int64                  `json:"valid_until" bson:"valid_until"`
+	RetryCount         int                    `json:"retry_count" bson:"retry_count"`
+	MaxAllowedRetry    int                    `json:"max_allowed_retry" bson:"max_allowed_retry"`
+	ResendCount        int                    `json:"resend_count" bson:"resend_count"`
+	MaxAllowedResend   int                    `json:"max_allowed_resend" bson:"max_allowed_resend"`
+	ResendValidUntil   int64                  `json:"resend_valid_until" bson:"resend_valid_until"`
+	ChallengeSignature string                 `json:"challenge_signature,omitempty" bson:"challenge_signature"`
+	IdentitySignature  string                 `json:"identity_signature,omitempty" bson:"identity_signature"`
+	UsedFor            string                 `json:"used_for" bson:"used_for"`
+	MetaData           map[string]interface{} `json:"meta_data,omitempty" bson:"meta_data"`
 }
 
 //Creating hook executed before database insert operation.
@@ -53,10 +52,6 @@ func (t *TwoFa) Creating() error {
 		t.MaxAllowedResend = viper.GetInt("AUTH_LOGIN_OTP_MAX_ALLOWED_RESEND")
 	}
 
-	if t.Status == "" {
-		t.Status = STATUS_CREATED
-	}
-
 	return t.Validate()
 }
 
@@ -69,9 +64,33 @@ func (t *TwoFa) Validate() error {
 		validation.Field(&t.Challenge, validation.Required, is.ASCII),
 		validation.Field(&t.Token, validation.Required, is.UUIDv4),
 		validation.Field(&t.ValidUntil, validation.Required),
+		validation.Field(&t.ResendValidUntil, validation.Required),
 		validation.Field(&t.MaxAllowedRetry, validation.Required),
 		validation.Field(&t.MaxAllowedResend, validation.Required),
 		validation.Field(&t.UsedFor, validation.Required, is.ASCII),
-		validation.Field(&t.Status, validation.Required, is.ASCII),
 	)
+}
+
+func (t *TwoFa) IsExpired() bool {
+	//return time.Now().UnixNano() > t.ValidUntil
+	vu := time.Unix(t.ValidUntil, 0)
+	return time.Now().UTC().After(vu)
+}
+
+func (t *TwoFa) IsResendExpired() bool {
+	//return time.Now().UnixNano() > t.ResendValidUntil
+	vu := time.Unix(t.ResendValidUntil, 0)
+	return time.Now().UTC().After(vu)
+}
+
+func (t *TwoFa) IsExceedMaxRetry() bool {
+	return t.RetryCount >= t.MaxAllowedRetry
+}
+
+func (t *TwoFa) IsExceedMaxResend() bool {
+	return t.ResendCount >= t.MaxAllowedResend
+}
+
+func (t *TwoFa) IncreaseResendCount() {
+	t.ResendCount = t.ResendCount + 1
 }

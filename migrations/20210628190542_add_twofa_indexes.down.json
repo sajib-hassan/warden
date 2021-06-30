@@ -5,6 +5,10 @@
   },
   {
     "dropIndexes": "two_fas",
+    "index": "idx_twofa_token_service_type_used_for"
+  },
+  {
+    "dropIndexes": "two_fas",
     "index": "idx_twofa_unique_token"
   },
   {

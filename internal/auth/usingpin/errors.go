@@ -41,7 +41,7 @@ func ErrUnauthorized(err error) render.Renderer {
 	}
 }
 
-// The list of default error types without specific error message.
+// ErrInternalServerError The list of default error types without specific error message.
 var (
 	ErrInternalServerError = &ErrResponse{
 		HTTPStatusCode: http.StatusInternalServerError,

@@ -68,7 +68,6 @@ func AuthenticateRefreshJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, claims, err := jwtauth.FromContext(r.Context())
 		if err != nil {
-			//logging.GetLogEntry(r).Warn(err)
 			logging.Logger.Warn(err)
 			render.Render(w, r, ErrUnauthorized(ErrTokenUnauthorized))
 			return
@@ -82,7 +81,6 @@ func AuthenticateRefreshJWT(next http.Handler) http.Handler {
 		var c RefreshClaims
 		err = c.ParseClaims(claims)
 		if err != nil {
-			//logging.GetLogEntry(r).Error(err)
 			logging.Logger.Error(err)
 			render.Render(w, r, ErrUnauthorized(ErrInvalidRefreshToken))
 			return

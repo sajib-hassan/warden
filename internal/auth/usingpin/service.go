@@ -2,51 +2,100 @@ package usingpin
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 	"time"
 
+	"github.com/go-chi/render"
 	"github.com/gofrs/uuid"
+	"github.com/mssola/user_agent"
 	"github.com/spf13/viper"
 
+	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 	"github.com/sajib-hassan/warden/pkg/helpmate"
 )
 
-func SentLoginOTP(as AuthStorer, u *User) (string, error) {
+func performLogin(w http.ResponseWriter, r *http.Request, acc *User, rs *Resource) {
+	ua := user_agent.New(r.UserAgent())
+	browser, _ := ua.Browser()
+
+	token := &jwt.Token{
+		Token:      uuid.Must(uuid.NewV4()).String(),
+		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
+		UserID:     acc.ID.Hex(),
+		Mobile:     ua.Mobile(),
+		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
+	}
+
+	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
+		log().Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
+
+	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
+	if err != nil {
+		log().Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
+
+	acc.LastLogin = time.Now()
+	if err := rs.Store.UpdateUser(acc); err != nil {
+		log().Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
+
+	render.Respond(w, r, &loginResponse{
+		Access:  access,
+		Refresh: refresh,
+		Slug:    acc.ID.Hex(),
+		Name:    acc.Name,
+		Mobile:  acc.Mobile,
+	})
+}
+
+func sentLoginOTP(as AuthStorer, u *User, body *loginRequest) (*mfa.TwoFa, error) {
 	vc := mfa.NewVerificationCode()
 
-	if u.Secret != "" {
+	if u.Secret == "" {
 		u.Secret = helpmate.RandSecret(20)
 		if err := as.UpdateUser(u); err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 
 	// Create OTP Object into DB
-	token := uuid.Must(uuid.NewV4()).String()
-	validUntil := time.Now().Add(viper.GetDuration("AUTH_LOGIN_OTP_TIMEOUT")).Unix()
+	validUntil := time.Now().UTC().Add(viper.GetDuration("AUTH_LOGIN_OTP_TIMEOUT")).Unix()
+	ResendValidUntil := time.Now().UTC().Add(viper.GetDuration("AUTH_LOGIN_OTP_RESEND_TIMEOUT")).Unix()
 	twoFa := &mfa.TwoFa{
-		ServiceId:   u.ID.Hex(),
-		ServiceType: reflect.TypeOf(u).String(),
-		Channel:     mfa.SMS,
-		Mobile:      u.Mobile,
-		Challenge:   vc.Hashed(u.Secret),
-		Token:       token,
-		ValidUntil:  validUntil,
-		UsedFor:     "login",
+		ServiceId:        u.ID.Hex(),
+		ServiceType:      reflect.TypeOf(u).String(),
+		Channel:          mfa.SMS,
+		Mobile:           u.Mobile,
+		Challenge:        vc.Hashed(u.Secret),
+		Token:            uuid.Must(uuid.NewV4()).String(),
+		ValidUntil:       validUntil,
+		ResendValidUntil: ResendValidUntil,
+		UsedFor:          "login",
+		MetaData: map[string]interface{}{
+			"device_id": body.DeviceId,
+		},
 	}
 
 	if err := as.CreateOrUpdateTwoFa(twoFa); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	message := fmt.Sprintf("Your Pathao Pay Login OTP is : %s", vc.Raw())
 	err := vc.SendSMS(u.Mobile, message)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return twoFa, nil
 }
 
 //func SentTOTP(as AuthStorer, u *User) (string, error) {

@@ -1,37 +1,48 @@
-[{
-  "createIndexes": "two_fas",
-  "indexes": [
-    {
-      "key": {
-        "token": 1,
-        "created_at": -1
+[
+  {
+    "createIndexes": "two_fas",
+    "indexes": [
+      {
+        "key": {
+          "token": 1,
+          "created_at": -1
+        },
+        "name": "idx_twofa_token_sort_by_asc_created",
+        "background": true
       },
-      "name": "idx_twofa_token_sort_by_asc_created",
-      "background": true
-    },
-    {
-      "key": {
-        "token": 1
+      {
+        "key": {
+          "token": 1,
+          "service_type": 1,
+          "used_for": 1
+        },
+        "name": "idx_twofa_token_service_type_used_for",
+        "background": true
       },
-      "name": "idx_twofa_unique_token",
-      "unique": true,
-      "background": true
-    },
-    {
-      "key": {
-        "service_id": 1,
-        "service_type": 1
+      {
+        "key": {
+          "token": 1
+        },
+        "name": "idx_twofa_unique_token",
+        "unique": true,
+        "background": true
       },
-      "name": "idx_twofa_service_id_type",
-      "background": true
-    },
-    {
-      "key": {
-        "mobile": 1,
-        "channel": 1
+      {
+        "key": {
+          "service_id": 1,
+          "service_type": 1
+        },
+        "name": "idx_twofa_service_id_type",
+        "background": true
       },
-      "name": "idx_twofa_mobile_channel",
-      "background": true
-    }
-  ]
-}]
+      {
+        "key": {
+          "mobile": 1,
+          "channel": 1
+        },
+        "name": "idx_twofa_mobile_channel",
+        "background": true
+      }
+    ]
+  }
+]

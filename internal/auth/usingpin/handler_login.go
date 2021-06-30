@@ -1,20 +1,16 @@
 package usingpin
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/go-chi/render"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/gofrs/uuid"
-	"github.com/mssola/user_agent"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"github.com/sajib-hassan/warden/pkg/auth/jwt"
+	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 	"github.com/sajib-hassan/warden/pkg/validator"
 )
 
@@ -31,10 +27,6 @@ type loginResponse struct {
 	Name    string `json:"name"`
 	Mobile  string `json:"mobile"`
 }
-
-// "user_slug": userObj.ID,
-//			"name":      userObj.FirstName + " " + userObj.LastName,
-//			"phone":     userObj.Phone,
 
 type loginOTPRequiredResponse struct {
 	ChallengeRequired bool `json:"challenge_required"`
@@ -103,7 +95,7 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if device == nil {
-		twoFaToken, err := SentLoginOTP(rs.Store, acc)
+		twoFa, err := sentLoginOTP(rs.Store, acc, body)
 		if err != nil {
 			log().WithFields(logrus.Fields{
 				"mobile":    body.Mobile,
@@ -113,49 +105,13 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Header().Set("Pathao-Challenge-Token", twoFaToken)
+		mfa.SetChallengeHeader(w, twoFa)
 		render.Respond(w, r, &loginOTPRequiredResponse{
 			ChallengeRequired: true,
 		})
 		return
 	}
 
-	ua := user_agent.New(r.UserAgent())
-	browser, _ := ua.Browser()
-
-	token := &jwt.Token{
-		Token:      uuid.Must(uuid.NewV4()).String(),
-		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
-		UserID:     acc.ID.Hex(),
-		Mobile:     ua.Mobile(),
-		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
-	}
-
-	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
-		log().Error(err)
-		render.Render(w, r, ErrInternalServerError)
-		return
-	}
-
-	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
-	if err != nil {
-		log().Error(err)
-		render.Render(w, r, ErrInternalServerError)
-		return
-	}
-
-	acc.LastLogin = time.Now()
-	if err := rs.Store.UpdateUser(acc); err != nil {
-		log().Error(err)
-		render.Render(w, r, ErrInternalServerError)
-		return
-	}
-
-	render.Respond(w, r, &loginResponse{
-		Access:  access,
-		Refresh: refresh,
-		Slug:    acc.ID.Hex(),
-		Name:    acc.Name,
-		Mobile:  acc.Mobile,
-	})
+	performLogin(w, r, acc, rs)
+	return
 }

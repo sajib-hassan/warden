@@ -19,5 +19,8 @@ type AuthStorer interface {
 	GetTrustedDevice(userId string, did string) (*Device, error)
 	RegisterAsTrustedDevice(d *Device) error
 
+	GetTwoFa(token string, serviceType string, usedFor string) (*mfa.TwoFa, error)
 	CreateOrUpdateTwoFa(t *mfa.TwoFa) error
+	DeleteTwoFa(t *mfa.TwoFa) error
+	PurgeExpiredTwoFa() error
 }

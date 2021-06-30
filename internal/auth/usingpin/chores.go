@@ -13,6 +13,10 @@ func (rs *Resource) choresTicker() {
 			if err := rs.Store.PurgeExpiredToken(); err != nil {
 				logging.Logger.WithField("chore", "purgeExpiredToken").Error(err)
 			}
+
+			if err := rs.Store.PurgeExpiredTwoFa(); err != nil {
+				logging.Logger.WithField("chore", "PurgeExpiredTwoFa").Error(err)
+			}
 		}
 	}()
 }
