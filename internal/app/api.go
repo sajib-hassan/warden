@@ -41,8 +41,8 @@ func NewAPI() (*API, error) {
 func (a *API) Router() *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Mount("/user", a.User.router())
-	r.Mount("/profile", a.Profile.router())
+	r.Mount("/v1/user", a.User.router())
+	r.Mount("/v1/profile", a.Profile.router())
 
 	return r
 }

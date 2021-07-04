@@ -138,13 +138,14 @@ func (rs *UserResource) updateToken(w http.ResponseWriter, r *http.Request) {
 	acc := r.Context().Value(ctxUser).(*usingpin.User)
 	for _, t := range acc.Token {
 		if t.ID.Hex() == id {
-			//if err := rs.Store.UpdateToken(&jwt.Token{
-			//	ID:         t.ID,
-			//	Identifier: data.Identifier,
-			//}); err != nil {
-			//	render.Render(w, r, ErrInvalidRequest(err))
-			//	return
-			//}
+			jt := &jwt.Token{
+				Identifier: data.Identifier,
+			}
+			jt.SetID(t.ID)
+			if err := rs.Store.UpdateToken(jt); err != nil {
+				render.Render(w, r, ErrInvalidRequest(err))
+				return
+			}
 		}
 	}
 	render.Respond(w, r, http.NoBody)
@@ -155,7 +156,9 @@ func (rs *UserResource) deleteToken(w http.ResponseWriter, r *http.Request) {
 	acc := r.Context().Value(ctxUser).(*usingpin.User)
 	for _, t := range acc.Token {
 		if t.ID.Hex() == id {
-			//rs.Store.DeleteToken(&jwt.Token{ID: t.ID})
+			jt := &jwt.Token{}
+			jt.SetID(t.ID)
+			rs.Store.DeleteToken(jt)
 		}
 	}
 	render.Respond(w, r, http.NoBody)
