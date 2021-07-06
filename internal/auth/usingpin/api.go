@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/sirupsen/logrus"
 
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/logging"
 )
@@ -12,11 +13,11 @@ import (
 // Resource implements PIN based user authentication against a database.
 type Resource struct {
 	TokenAuth *jwt.TokenAuth
-	Store     AuthStorer
+	Store     authorize.AuthStorer
 }
 
 // NewResource returns a configured authentication resource.
-func NewResource(authStore AuthStorer) (*Resource, error) {
+func NewResource(authStore authorize.AuthStorer) (*Resource, error) {
 	tokenAuth, err := jwt.NewTokenAuth()
 	if err != nil {
 		return nil, err

@@ -12,6 +12,7 @@ import (
 	"github.com/sajib-hassan/warden/internal/app"
 	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/internal/db/repos"
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/dbconn"
 	"github.com/sajib-hassan/warden/pkg/logging"
@@ -45,6 +46,8 @@ func New() (*chi.Mux, error) {
 	router.Group(func(rt chi.Router) {
 		rt.Use(authResource.TokenAuth.Verifier())
 		rt.Use(jwt.Authenticator)
+		rt.Use(authorize.RequiredToken(authStore))
+		rt.Use(authorize.RequiredUser(authStore))
 		rt.Mount("/api", appAPI.Router())
 	})
 

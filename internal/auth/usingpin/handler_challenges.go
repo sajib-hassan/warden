@@ -14,6 +14,7 @@ import (
 	"github.com/mssola/user_agent"
 	"github.com/spf13/viper"
 
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 )
 
@@ -37,38 +38,40 @@ func (rs *Resource) validateOTP(w http.ResponseWriter, r *http.Request) {
 	body.Token = mfa.GetChallengeHeader(r)
 	if err := render.Bind(r, body); err != nil {
 		log().WithField("challenge_code", "******").Warn(err)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrInvalidChallengeToken))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrInvalidChallengeToken))
 		return
 	}
 
-	twoFa, err := rs.Store.GetTwoFa(body.Token, "*usingpin.User", "login")
+	twoFa, err := rs.Store.GetTwoFa(body.Token, authorize.TwoFaLoginServiceType, authorize.TwoFaLoginFor)
 	if err != nil {
 		log().Error(err)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrInvalidChallengeToken))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrInvalidChallengeToken))
 		return
 	}
 
 	if twoFa.IsExpired() {
-		render.Render(w, r, ErrUnauthorized(mfa.ErrResendTimeExpired))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrResendTimeExpired))
 		return
 	}
 
 	if twoFa.IsExceedMaxRetry() {
-		render.Render(w, r, ErrUnauthorized(mfa.ErrMaxResendExceed))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrMaxResendExceed))
 		return
 	}
 
 	acc, err := rs.Store.GetUser(twoFa.ServiceId)
 	if err != nil {
 		log().Error(err)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrChallengeTokenUnauthorized))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrChallengeTokenUnauthorized))
 		return
 	}
 
 	if !acc.CanLogin() {
-		render.Render(w, r, ErrUnauthorized(ErrLoginDisabled))
+		render.Render(w, r, authorize.ErrUnauthorized(ErrLoginDisabled))
 		return
 	}
+
+	srv := &service{w: w, r: r, rs: rs}
 
 	vc := mfa.NewVerificationCode()
 
@@ -77,7 +80,7 @@ func (rs *Resource) validateOTP(w http.ResponseWriter, r *http.Request) {
 		if err := rs.Store.CreateOrUpdateTwoFa(twoFa); err != nil {
 			log().Error(err)
 		}
-		render.Render(w, r, ErrUnauthorized(mfa.ErrChallengeCodeMissMatched))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrChallengeCodeMissMatched))
 		return
 	}
 
@@ -103,7 +106,7 @@ func (rs *Resource) validateOTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			ua := user_agent.New(r.UserAgent())
 			name, version := ua.Engine()
-			device = &Device{
+			device = &authorize.Device{
 				UserID:       acc.ID.Hex(),
 				Identifier:   deviceId,
 				Name:         fmt.Sprintf("%v %v", ua.OS(), ua.Platform()),
@@ -123,7 +126,7 @@ func (rs *Resource) validateOTP(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInternalServerError)
 	}
 
-	performLogin(w, r, acc, rs)
+	srv.performLogin(acc)
 	return
 }
 
@@ -134,33 +137,33 @@ type resendOTPResponse struct {
 func (rs *Resource) resendOTP(w http.ResponseWriter, r *http.Request) {
 	token := mfa.GetChallengeHeader(r)
 	if token == "" {
-		render.Render(w, r, ErrUnauthorized(mfa.ErrInvalidChallengeToken))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrInvalidChallengeToken))
 		return
 	}
 
-	twoFa, err := rs.Store.GetTwoFa(token, "*usingpin.User", "login")
+	twoFa, err := rs.Store.GetTwoFa(token, authorize.TwoFaLoginServiceType, authorize.TwoFaLoginFor)
 	if err != nil {
 		log().Error(err)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrInvalidChallengeToken))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrInvalidChallengeToken))
 		return
 	}
 
 	if twoFa.IsExceedMaxResend() {
 		rs.Store.DeleteTwoFa(twoFa)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrMaxResendExceed))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrMaxResendExceed))
 		return
 	}
 
 	if twoFa.IsResendExpired() {
 		rs.Store.DeleteTwoFa(twoFa)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrResendTimeExpired))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrResendTimeExpired))
 		return
 	}
 
 	acc, err := rs.Store.GetUser(twoFa.ServiceId)
 	if err != nil {
 		log().Error(err)
-		render.Render(w, r, ErrUnauthorized(mfa.ErrChallengeTokenUnauthorized))
+		render.Render(w, r, authorize.ErrUnauthorized(mfa.ErrChallengeTokenUnauthorized))
 		return
 	}
 

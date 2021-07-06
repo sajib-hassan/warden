@@ -4,7 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/jwtauth"
+	"github.com/go-chi/jwtauth/v5"
+	"github.com/lestrrat-go/jwx/jwt"
 
 	"github.com/sajib-hassan/warden/pkg/logging"
 
@@ -41,7 +42,7 @@ func Authenticator(next http.Handler) http.Handler {
 			return
 		}
 
-		if !token.Valid {
+		if token == nil || jwt.Validate(token) != nil {
 			render.Render(w, r, ErrUnauthorized(ErrTokenExpired))
 			return
 		}
@@ -70,7 +71,7 @@ func AuthenticateRefreshJWT(next http.Handler) http.Handler {
 			render.Render(w, r, ErrUnauthorized(ErrTokenUnauthorized))
 			return
 		}
-		if !token.Valid {
+		if token == nil || jwt.Validate(token) != nil {
 			render.Render(w, r, ErrUnauthorized(ErrTokenExpired))
 			return
 		}

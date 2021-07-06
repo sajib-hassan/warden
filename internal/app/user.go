@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/render"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 
-	"github.com/sajib-hassan/warden/internal/auth/usingpin"
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
@@ -60,7 +60,7 @@ func (rs *UserResource) userCtx(next http.Handler) http.Handler {
 }
 
 type userRequest struct {
-	*usingpin.User
+	*authorize.User
 	// override protected data here, although not really necessary here
 	// as we limit updated database columns in store as well
 	ProtectedID     int      `json:"id"`
@@ -75,21 +75,21 @@ func (d *userRequest) Bind(r *http.Request) error {
 }
 
 type userResponse struct {
-	*usingpin.User
+	*authorize.User
 }
 
-func newUserResponse(a *usingpin.User) *userResponse {
+func newUserResponse(a *authorize.User) *userResponse {
 	resp := &userResponse{User: a}
 	return resp
 }
 
 func (rs *UserResource) get(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxUser).(*usingpin.User)
+	acc := r.Context().Value(ctxUser).(*authorize.User)
 	render.Respond(w, r, newUserResponse(acc))
 }
 
 func (rs *UserResource) update(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxUser).(*usingpin.User)
+	acc := r.Context().Value(ctxUser).(*authorize.User)
 	data := &userRequest{User: acc}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -110,7 +110,7 @@ func (rs *UserResource) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *UserResource) delete(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxUser).(*usingpin.User)
+	acc := r.Context().Value(ctxUser).(*authorize.User)
 	if err := rs.Store.Delete(acc); err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
@@ -135,7 +135,7 @@ func (rs *UserResource) updateToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	acc := r.Context().Value(ctxUser).(*usingpin.User)
+	acc := r.Context().Value(ctxUser).(*authorize.User)
 	for _, t := range acc.Token {
 		if t.ID.Hex() == id {
 			jt := &jwt.Token{
@@ -153,7 +153,7 @@ func (rs *UserResource) updateToken(w http.ResponseWriter, r *http.Request) {
 
 func (rs *UserResource) deleteToken(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "tokenID")
-	acc := r.Context().Value(ctxUser).(*usingpin.User)
+	acc := r.Context().Value(ctxUser).(*authorize.User)
 	for _, t := range acc.Token {
 		if t.ID.Hex() == id {
 			jt := &jwt.Token{}

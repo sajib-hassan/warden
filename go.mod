@@ -5,22 +5,21 @@ go 1.16
 require (
 	github.com/alexedwards/argon2id v0.0.0-20210511081203-7d35d68092b8
 	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getsentry/raven-go v0.2.0
-	github.com/go-chi/chi v4.0.0+incompatible // indirect
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-chi/docgen v1.2.0
-	github.com/go-chi/jwtauth v4.0.4+incompatible
+	github.com/go-chi/jwtauth/v5 v5.0.1
 	github.com/go-chi/render v1.0.1
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/joho/godotenv v1.3.0
 	github.com/kamva/mgm/v3 v3.1.0
+	github.com/lestrrat-go/jwx v1.1.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mssola/user_agent v0.5.1
 	github.com/pelletier/go-toml v1.6.0 // indirect
-	github.com/pquerna/otp v1.3.0 // indirect
+	github.com/pquerna/otp v1.3.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect

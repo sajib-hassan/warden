@@ -11,44 +11,36 @@ import (
 	"github.com/mssola/user_agent"
 	"github.com/spf13/viper"
 
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 	"github.com/sajib-hassan/warden/pkg/helpmate"
 )
 
-func performLogin(w http.ResponseWriter, r *http.Request, acc *User, rs *Resource) {
-	ua := user_agent.New(r.UserAgent())
+type service struct {
+	w  http.ResponseWriter
+	r  *http.Request
+	rs *Resource
+}
+
+func (s *service) performLogin(acc *authorize.User) {
+	ua := user_agent.New(s.r.UserAgent())
 	browser, _ := ua.Browser()
 
 	token := &jwt.Token{
 		Token:      uuid.Must(uuid.NewV4()).String(),
-		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
+		Expiry:     time.Now().Add(s.rs.TokenAuth.JwtRefreshExpiry),
 		UserID:     acc.ID.Hex(),
 		Mobile:     ua.Mobile(),
 		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
 	}
 
-	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
-		log().Error(err)
-		render.Render(w, r, ErrInternalServerError)
+	access, refresh, done := s.getTokens(acc, token)
+	if !done {
 		return
 	}
 
-	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
-	if err != nil {
-		log().Error(err)
-		render.Render(w, r, ErrInternalServerError)
-		return
-	}
-
-	acc.LastLogin = time.Now()
-	if err := rs.Store.UpdateUser(acc); err != nil {
-		log().Error(err)
-		render.Render(w, r, ErrInternalServerError)
-		return
-	}
-
-	render.Respond(w, r, &loginResponse{
+	render.Respond(s.w, s.r, &loginResponse{
 		Access:  access,
 		Refresh: refresh,
 		Slug:    acc.ID.Hex(),
@@ -57,12 +49,35 @@ func performLogin(w http.ResponseWriter, r *http.Request, acc *User, rs *Resourc
 	})
 }
 
-func sentLoginOTP(as AuthStorer, u *User, body *loginRequest) (*mfa.TwoFa, error) {
+func (s *service) getTokens(acc *authorize.User, token *jwt.Token) (string, string, bool) {
+	if err := s.rs.Store.CreateOrUpdateToken(token); err != nil {
+		log().Error(err)
+		render.Render(s.w, s.r, ErrInternalServerError)
+		return "", "", false
+	}
+
+	access, refresh, err := s.rs.TokenAuth.GenTokenPair(acc.Claims(token), token.Claims())
+	if err != nil {
+		log().Error(err)
+		render.Render(s.w, s.r, ErrInternalServerError)
+		return "", "", false
+	}
+
+	acc.LastLogin = time.Now()
+	if err := s.rs.Store.UpdateUser(acc); err != nil {
+		log().Error(err)
+		render.Render(s.w, s.r, ErrInternalServerError)
+		return "", "", false
+	}
+	return access, refresh, true
+}
+
+func (s *service) sentLoginOTP(u *authorize.User, body *loginRequest) (*mfa.TwoFa, error) {
 	vc := mfa.NewVerificationCode()
 
 	if u.Secret == "" {
 		u.Secret = helpmate.RandSecret(20)
-		if err := as.UpdateUser(u); err != nil {
+		if err := s.rs.Store.UpdateUser(u); err != nil {
 			return nil, err
 		}
 	}
@@ -85,7 +100,7 @@ func sentLoginOTP(as AuthStorer, u *User, body *loginRequest) (*mfa.TwoFa, error
 		},
 	}
 
-	if err := as.CreateOrUpdateTwoFa(twoFa); err != nil {
+	if err := s.rs.Store.CreateOrUpdateTwoFa(twoFa); err != nil {
 		return nil, err
 	}
 

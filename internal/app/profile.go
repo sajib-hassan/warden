@@ -18,12 +18,6 @@ var (
 	ErrProfileValidation = errors.New("profile validation error")
 )
 
-// ProfileStore defines database operations for a profile.
-type ProfileStore interface {
-	Get(userID string) (*models.Profile, error)
-	Update(p *models.Profile) error
-}
-
 // ProfileResource implements profile management handler.
 type ProfileResource struct {
 	Store ProfileStore

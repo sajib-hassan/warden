@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/internal/db/repos"
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/encryptor"
 )
 
@@ -13,7 +13,7 @@ import (
 func (s Seed) UsersSeed() {
 	pin1, _ := encryptor.GenerateFromPassword("54321")
 	pin2, _ := encryptor.GenerateFromPassword("65432")
-	user1 := &usingpin.User{
+	user1 := &authorize.User{
 		Mobile: "01600000001",
 		Pin:    pin1,
 		Name:   "Sajib",
@@ -21,7 +21,7 @@ func (s Seed) UsersSeed() {
 		Roles:  []string{"customer"},
 	}
 
-	user2 := &usingpin.User{
+	user2 := &authorize.User{
 		Mobile: "01700000001",
 		Pin:    pin2,
 		Name:   "Hassan",

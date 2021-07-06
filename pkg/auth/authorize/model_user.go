@@ -1,4 +1,4 @@
-package usingpin
+package authorize
 
 import (
 	"strings"
@@ -26,8 +26,8 @@ type User struct {
 	Secret    string    `json:"secret,omitempty" bson:"secret"`
 	LastLogin time.Time `json:"last_login,omitempty" bson:"last_login"`
 
-	Roles []string    `json:"roles,omitempty" bson:"roles"`
-	Token []jwt.Token `json:"token,omitempty"`
+	Roles []string    `json:"roles,omitempty" bson:"roles,omitempty"`
+	Token []jwt.Token `json:"token,omitempty" bson:"-"`
 }
 
 // Creating hook executed before database insert operation.
@@ -74,15 +74,16 @@ func (u *User) CanLogin() bool {
 	return u.Active
 }
 
-func (u *User) isPinMatched(pin string) (bool, error) {
+func (u *User) IsPinMatched(pin string) (bool, error) {
 	return encryptor.ComparePasswordAndHash(pin, u.Pin)
 }
 
 // Claims returns the user's claims to be signed
-func (u *User) Claims() jwt.AppClaims {
+func (u *User) Claims(t *jwt.Token) jwt.AppClaims {
 	return jwt.AppClaims{
 		ID:    u.ID.Hex(),
 		Sub:   u.Name,
 		Roles: u.Roles,
+		Token: t.Token,
 	}
 }

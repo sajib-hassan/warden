@@ -29,3 +29,13 @@ var (
 		StatusText:     http.StatusText(http.StatusForbidden),
 	}
 )
+
+// ErrUnauthorized renders status 401 Unauthorized with custom error message.
+func ErrUnauthorized(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: http.StatusUnauthorized,
+		StatusText:     http.StatusText(http.StatusUnauthorized),
+		ErrorText:      err.Error(),
+	}
+}

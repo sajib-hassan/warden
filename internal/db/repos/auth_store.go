@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/sajib-hassan/warden/internal/auth/usingpin"
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 )
@@ -23,8 +23,8 @@ func NewAuthStore() *AuthStore {
 }
 
 // GetUser returns an user by ID.
-func (s *AuthStore) GetUser(id string) (*usingpin.User, error) {
-	u := &usingpin.User{}
+func (s *AuthStore) GetUser(id string) (*authorize.User, error) {
+	u := &authorize.User{}
 	err := mgm.Coll(u).FindByID(id, u)
 
 	if err != nil {
@@ -37,8 +37,8 @@ func (s *AuthStore) GetUser(id string) (*usingpin.User, error) {
 }
 
 // GetUserByMobile returns an user by mobile.
-func (s *AuthStore) GetUserByMobile(m string) (*usingpin.User, error) {
-	u := &usingpin.User{}
+func (s *AuthStore) GetUserByMobile(m string) (*authorize.User, error) {
+	u := &authorize.User{}
 	err := mgm.Coll(u).First(bson.M{"mobile": m}, u)
 
 	if err != nil {
@@ -51,7 +51,7 @@ func (s *AuthStore) GetUserByMobile(m string) (*usingpin.User, error) {
 }
 
 // UpdateUser updates user data related to PIN based authentication .
-func (s *AuthStore) UpdateUser(u *usingpin.User) error {
+func (s *AuthStore) UpdateUser(u *authorize.User) error {
 	return mgm.Coll(u).Update(u)
 }
 
@@ -91,8 +91,8 @@ func (s *AuthStore) PurgeExpiredToken() error {
 	return err
 }
 
-func (s AuthStore) GetTrustedDevice(userId string, identifier string) (*usingpin.Device, error) {
-	d := &usingpin.Device{}
+func (s AuthStore) GetTrustedDevice(userId string, identifier string) (*authorize.Device, error) {
+	d := &authorize.Device{}
 	err := mgm.Coll(d).First(bson.M{"user_id": userId, "identifier": identifier, "is_authorized": true}, d)
 
 	if err != nil {
@@ -104,7 +104,7 @@ func (s AuthStore) GetTrustedDevice(userId string, identifier string) (*usingpin
 	return d, nil
 }
 
-func (s AuthStore) RegisterAsTrustedDevice(d *usingpin.Device) error {
+func (s AuthStore) RegisterAsTrustedDevice(d *authorize.Device) error {
 	var err error
 	if d.ID.IsZero() {
 		err = mgm.Coll(d).Create(d)

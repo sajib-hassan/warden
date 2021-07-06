@@ -1,4 +1,4 @@
-package usingpin
+package authorize
 
 import (
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"

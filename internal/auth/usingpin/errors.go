@@ -31,16 +31,6 @@ func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// ErrUnauthorized renders status 401 Unauthorized with custom error message.
-func ErrUnauthorized(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusUnauthorized,
-		StatusText:     http.StatusText(http.StatusUnauthorized),
-		ErrorText:      err.Error(),
-	}
-}
-
 // ErrInternalServerError The list of default error types without specific error message.
 var (
 	ErrInternalServerError = &ErrResponse{

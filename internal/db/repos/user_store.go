@@ -5,8 +5,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/sajib-hassan/warden/internal/auth/usingpin"
 	"github.com/sajib-hassan/warden/internal/db/models"
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/jwt"
 )
 
@@ -20,8 +20,8 @@ func NewUserStore() *UserStore {
 }
 
 // Get an user by ID.
-func (s *UserStore) Get(id string) (*usingpin.User, error) {
-	u := &usingpin.User{}
+func (s *UserStore) Get(id string) (*authorize.User, error) {
+	u := &authorize.User{}
 	err := mgm.Coll(u).FindByID(id, u)
 
 	if err != nil {
@@ -34,17 +34,17 @@ func (s *UserStore) Get(id string) (*usingpin.User, error) {
 }
 
 // Create a user
-func (s *UserStore) Create(u *usingpin.User) error {
+func (s *UserStore) Create(u *authorize.User) error {
 	return mgm.Coll(u).Create(u)
 }
 
 // Update an user.
-func (s *UserStore) Update(u *usingpin.User) error {
+func (s *UserStore) Update(u *authorize.User) error {
 	return mgm.Coll(u).Update(u)
 }
 
 // Delete an user.
-func (s *UserStore) Delete(u *usingpin.User) error {
+func (s *UserStore) Delete(u *authorize.User) error {
 
 	return mgm.Transaction(func(session mongo.Session, sc mongo.SessionContext) error {
 

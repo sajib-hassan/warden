@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/jwtauth"
-
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/spf13/viper"
 )
 
@@ -55,7 +54,7 @@ func (a *TokenAuth) GenTokenPair(accessClaims AppClaims, refreshClaims RefreshCl
 func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
 	c.ExpiresAt = time.Now().Add(a.JwtExpiry).Unix()
-	_, tokenString, err := a.JwtAuth.Encode(c)
+	_, tokenString, err := a.JwtAuth.Encode(c.AsMap())
 	return tokenString, err
 }
 
@@ -63,7 +62,7 @@ func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
 func (a *TokenAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
 	c.ExpiresAt = time.Now().Add(a.JwtRefreshExpiry).Unix()
-	_, tokenString, err := a.JwtAuth.Encode(c)
+	_, tokenString, err := a.JwtAuth.Encode(c.AsMap())
 	return tokenString, err
 }
 

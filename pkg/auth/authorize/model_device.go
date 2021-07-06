@@ -1,4 +1,4 @@
-package usingpin
+package authorize
 
 import "github.com/kamva/mgm/v3"
 

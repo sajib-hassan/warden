@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
+	"github.com/sajib-hassan/warden/pkg/auth/authorize"
 	"github.com/sajib-hassan/warden/pkg/auth/mfa"
 	"github.com/sajib-hassan/warden/pkg/validator"
 )
@@ -61,47 +62,49 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 			"pin":       "*******",
 			"device_id": body.DeviceId,
 		}).Warn(err)
-		render.Render(w, r, ErrUnauthorized(ErrInvalidLogin))
+		render.Render(w, r, authorize.ErrUnauthorized(ErrInvalidLogin))
 		return
 	}
 
 	acc, err := rs.Store.GetUserByMobile(body.Mobile)
 	if err != nil {
 		log().WithField("mobile", body.Mobile).Warn(err)
-		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
+		render.Render(w, r, authorize.ErrUnauthorized(ErrUnknownLogin))
 		return
 	}
 
 	if !acc.CanLogin() {
-		render.Render(w, r, ErrUnauthorized(ErrLoginDisabled))
+		render.Render(w, r, authorize.ErrUnauthorized(ErrLoginDisabled))
 		return
 	}
 
-	if ok, err := acc.isPinMatched(body.Pin); !ok {
+	if ok, err := acc.IsPinMatched(body.Pin); !ok {
 		log().WithFields(logrus.Fields{
 			"mobile":    body.Mobile,
 			"pin":       "*******",
 			"device_id": body.DeviceId,
 		}).Warn(err)
-		render.Render(w, r, ErrUnauthorized(ErrInvalidLogin))
+		render.Render(w, r, authorize.ErrUnauthorized(ErrInvalidLogin))
 		return
 	}
 
 	device, err := rs.Store.GetTrustedDevice(acc.ID.Hex(), body.DeviceId)
 	if err != nil {
 		log().WithField("device_id", body.DeviceId).Error(err)
-		render.Render(w, r, ErrUnauthorized(err))
+		render.Render(w, r, authorize.ErrUnauthorized(err))
 		return
 	}
 
+	srv := &service{w: w, r: r, rs: rs}
+
 	if device == nil {
-		twoFa, err := sentLoginOTP(rs.Store, acc, body)
+		twoFa, err := srv.sentLoginOTP(acc, body)
 		if err != nil {
 			log().WithFields(logrus.Fields{
 				"mobile":    body.Mobile,
 				"device_id": body.DeviceId,
 			}).Error(err)
-			render.Render(w, r, ErrUnauthorized(err))
+			render.Render(w, r, authorize.ErrUnauthorized(err))
 			return
 		}
 
@@ -112,6 +115,6 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	performLogin(w, r, acc, rs)
+	srv.performLogin(acc)
 	return
 }
